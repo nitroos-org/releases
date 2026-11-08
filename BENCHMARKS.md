@@ -7,7 +7,7 @@
 Measured 2026-10-19 on one AMD EPYC 9254 host under QEMU/KVM, 4 vCPU / 2 GB, both sides built Release from the same sources.
 
 - **A — ReactOS master:** upstream [`ac1ab9e3043`](https://github.com/reactos/reactos/commit/ac1ab9e3043) (the reactos-nitro base).
-- **B — reactos-nitro:** fork `main` [`23dd8f7e336`](https://github.com/tomassrnka/reactos/commit/23dd8f7e336).
+- **B — reactos-nitro:** fork `main` [`23dd8f7e336`](https://github.com/nitroos-org/reactos/commit/23dd8f7e336).
 
 ## The two things that don't compare
 
