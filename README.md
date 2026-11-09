@@ -223,7 +223,7 @@ What we are working on now. These are goals, not promises: the release notes wil
 
 | Area | Status | Goal |
 |---|---|---|
-| Faster | in progress | Speed up the file system, cached writes and process start. In the development version, listing a large folder is already about 15 times faster and cached writes are about 10 times faster. Our goal for 2026.12-1 is to match or beat Windows 10 across our benchmarks. |
+| Faster | in progress | Speed up the file system, cached writes and process start. In the development version, listing a large folder is about 15 times faster, cached writes are about 15 times faster and starting a 64-bit program takes about half the time. Our goal for 2026.12-1 is to match or beat Windows 10 across our benchmarks. |
 | Memory | in testing | When paging is on, programs will be able to use up to the size of RAM plus the paging file. This is in final testing. |
 | Locales | done | Date, number and currency formats closer to Windows, still built from Unicode's public data: 13 of the 26 lines in our .NET test now match Windows exactly, up from 8. |
 | Drivers and virtual machines | done | Better driver support (interrupts for KMDF drivers, a log of missing driver functions, process and thread callbacks), and the system disk grows automatically when you enlarge a virtual disk. |
