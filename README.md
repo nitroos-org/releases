@@ -5,19 +5,19 @@
   </picture>
 </p>
 
-<p align="center"><b>A ReactOS-based, Windows-compatible desktop OS that runs current 64-bit and 32-bit apps.</b><br>
-Chrome, Firefox, VS Code, PowerShell 7 and .NET Framework 4.8 programs, on an NTFS disk with a firewall switched on.</p>
+<p align="center"><b>Our aim: an open-source, Windows-compatible operating system.</b><br>
+NitroOS is built on ReactOS, with major enhancements: current 64-bit and 32-bit apps side by side, .NET Framework 4.8, PowerShell 7, NTFS by default and a firewall that is on.</p>
 
 <p align="center">
   <a href="#download">Download</a> ·
-  <a href="#screenshots-nitroos-vs-reactos">Screenshots</a> ·
+  <a href="#screenshots">Screenshots</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#known-limitations">Known limitations</a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
   <a href="BENCHMARKS.md">Benchmarks</a>
 </p>
 
-<p align="center"><img alt="NitroOS 2026.11-1 running Chrome, Visual Studio Code and the Features dialog" src="docs/img/hero.webp"></p>
+<p align="center"><a href="docs/img/hero.webp"><img alt="NitroOS 2026.11-1 running Chrome, Visual Studio Code and the Features dialog" src="docs/img/hero.webp"></a></p>
 
 > **NitroOS is an unofficial build based on [ReactOS](https://reactos.org). It is not affiliated with or endorsed by the ReactOS project.** ReactOS is a trademark of the ReactOS project. **Do not report problems from this build to the ReactOS project; report them here.**
 >
@@ -27,21 +27,21 @@ This repository (`nitroos-org/releases`, formerly "reactos-nitro") publishes the
 
 **Latest release: `2026.11-1` (2026-11-09)**, on upstream ReactOS base [`e46f4bb1a1e`](https://github.com/reactos/reactos/commit/e46f4bb1a1ea7c722f941231565144fe0c286d3e). 592 changes since 2026.10-5. Everything on this page was produced with that build.
 
-## Why NitroOS
+## Major enhancements
 
-Each point links to the evidence: a screenshot from the same task run on both systems, or a measured number. The comparison system is **stock ReactOS 0.4.16** (the latest release, `0.4.16-x86`), because upstream ReactOS cannot install as a 64-bit system at the moment (see [below](#why-the-comparison-is-32-bit-reactos)). Same VM settings for both: 4 vCPU, 4 GB RAM, 1024x768, user-mode network, 20 GB disk.
+What NitroOS adds on top of ReactOS. Each point links to a screenshot or a measured number.
 
-| You get | Evidence |
+| Enhancement | Evidence |
 |---|---|
-| **Current apps run.** Chrome 157, Firefox 159, Visual Studio Code 1.145 and PowerShell 7.6 start and work (versions seen on 2026-11-08). | [browser](#screenshots-nitroos-vs-reactos), [VS Code](#screenshots-nitroos-vs-reactos), [PowerShell 7](#screenshots-nitroos-vs-reactos) |
-| **32-bit and 64-bit programs side by side.** 64-bit Firefox and 32-bit Firefox run at the same time; Task Manager marks the 32-bit processes with `*32`. | [Task Manager](#screenshots-nitroos-vs-reactos) |
-| **.NET Framework 4.8 programs run.** A WinForms program built inside the VM with the .NET 4.8 compiler starts and its controls work (CLR 4.0.30319.42000). | [.NET](#screenshots-nitroos-vs-reactos) |
-| **A Windows 10-compatible version number.** The system reports NT 10.0, build 19045, so installers and apps that check the version proceed. Stock ReactOS reports NT 5.2, build 3790. | [About dialog](#screenshots-nitroos-vs-reactos) |
-| **The whole 4 GB is usable.** 3.99 GB of 4 GB shows as installed memory (stock ReactOS 0.4.16 shows 2.99 GB), and Setup picks the multiprocessor kernel (stock: uniprocessor, on the same 4-vCPU VM). | [About dialog](#screenshots-nitroos-vs-reactos), [Setup summary](#screenshots-nitroos-vs-reactos) |
-| **NTFS by default.** Setup offers NTFS and preselects it; stock ReactOS 0.4.16 offers FAT. | [Setup, format step](#screenshots-nitroos-vs-reactos) |
-| **A firewall that is on.** NitroOS Firewall reports state "On" for the private network after a fresh install. | [Firewall](#screenshots-nitroos-vs-reactos) |
-| **Features on demand.** A Features dialog turns on PowerShell 7, Scoop, .NET Framework 4.8, Firefox, the AAC audio decoder and more, and downloads them when ticked. | [Features](#screenshots-nitroos-vs-reactos) |
-| **Faster memory paths than stock ReactOS** (measured on 32-bit builds of both): see [the numbers](#measured-nitroos-vs-stock-reactos). | table below |
+| **Current apps run.** Chrome 157, Firefox 159, Visual Studio Code 1.145 and PowerShell 7.6 start and work (versions seen on 2026-11-08). | [browser](#screenshots), [VS Code](#screenshots), [PowerShell 7](#screenshots) |
+| **32-bit and 64-bit programs side by side.** 64-bit Firefox and 32-bit Firefox run at the same time; Task Manager marks the 32-bit processes with `*32`. | [Task Manager](#screenshots) |
+| **.NET Framework 4.8 programs run.** A WinForms program built inside the VM with the .NET 4.8 compiler starts and its controls work (CLR 4.0.30319.42000). | [.NET](#screenshots) |
+| **A Windows 10-compatible version number.** The system reports NT 10.0, build 19045, so installers and apps that check the version proceed. | [About dialog](#screenshots) |
+| **The whole 4 GB is usable.** 3.99 GB of 4 GB shows as installed memory, and Setup picks the multiprocessor kernel on a multi-CPU machine. | [About dialog](#screenshots), [Setup summary](#screenshots) |
+| **NTFS by default.** Setup offers NTFS and preselects it. | [Setup, format step](#screenshots) |
+| **A firewall that is on.** NitroOS Firewall reports state "On" for the private network after a fresh install. | [Firewall](#screenshots) |
+| **Features on demand.** A Features dialog turns on PowerShell 7, Scoop, .NET Framework 4.8, Firefox, the AAC audio decoder and more, and downloads them when ticked. | [Features](#screenshots) |
+| **Faster memory paths** than the ReactOS code it builds on (measured on 32-bit builds of both): see [the numbers](#measured-nitroos-vs-stock-reactos). | table below |
 
 ### Measured: NitroOS vs stock ReactOS
 
@@ -61,32 +61,18 @@ Lane `bench4`, 2026-11-08, one host (AMD EPYC 9254, QEMU 8.2 with KVM), 4 vCPU, 
 
 Where stock ReactOS is ahead, from the same run: stock ReactOS is a **single-CPU** kernel, which helps it on lock-contention tests. A 4-thread heap test takes 450 ms on stock and 12,180 ms on NitroOS i386 (stock is 27x better); event ping-pong between two threads takes 51 ms on stock and 583 ms on NitroOS (11x better); reading 10,000 small files on FAT takes 95 ms on stock and 183 ms on NitroOS (1.9x better). Details, per-run spread, the 1 GB memory-pressure set and the method are in `BENCHMARKS.md` and the full study.
 
-## Screenshots: NitroOS vs ReactOS
+## Screenshots
 
-Every pair is the same task on a fresh VM of each system (4 vCPU, 4 GB, 1024x768), captured with QEMU's screen dump, **not edited**. **ReactOS: the 0.4.16 x86 release (`20260829-0.4.16-release-0-g822e864`); the amd64 nightly could not install (0x71 / 0x1E, below).** **NitroOS: an amd64 build of fork main `049578fe905` with the NitroOS brand layer (v12) applied, per `BRAND-APPLY.md`**; it differs from the release ISO below only by the 2026.11-1 re-cut, so the desktop art (wallpaper, N start button) is what the branded builds show. Where ReactOS cannot do the task, the right-hand picture shows what actually happened.
+NitroOS 2026.11-1 (amd64, fork main `049578fe905` with the NitroOS brand layer applied, per `BRAND-APPLY.md`) on a fresh VM: 4 vCPU, 4 GB, 1024x768. Captured with QEMU's screen dump, **not edited**. Click a picture for full size.
 
-| Task | NitroOS 2026.11-1 (amd64) | Stock ReactOS 0.4.16 (x86) |
-|---|---|---|
-| **Desktop**, each system's default look | <img src="docs/img/nitro-desktop.webp" alt="NitroOS desktop"> | <img src="docs/img/reactos-desktop.webp" alt="ReactOS 0.4.16 desktop"> |
-| **About dialog.** NitroOS: NT 10.0 build 19045, 3.99 GB. ReactOS: NT 5.2 build 3790, 2.99 GB. | <img src="docs/img/nitro-winver.webp" alt="NitroOS About dialog"> | <img src="docs/img/reactos-winver.webp" alt="ReactOS About dialog"> |
-| **A browser on a real https page** (reactos.org). The same page (reactos.org) on both. NitroOS: Chrome 157.0.8103.39 (installed with Scoop). ReactOS: Firefox 52.9 ESR, the newest Firefox in its Applications Manager. | <img src="docs/img/nitro-browser.webp" alt="Chrome on NitroOS showing reactos.org"> | <img src="docs/img/reactos-browser.webp" alt="Firefox 52 on ReactOS showing reactos.org"> |
-| **Firefox 64-bit and 32-bit side by side, with Task Manager.** NitroOS: two Firefox 159 windows; Task Manager lists both plain `firefox.exe` (64-bit) and `firefox.exe *32` (32-bit) processes. ReactOS: one Firefox 52, 20 processes, none marked `*32`. | <img src="docs/img/nitro-firefox-64-32.webp" alt="Two Firefox windows and Task Manager on NitroOS"> | <img src="docs/img/reactos-firefox-taskmgr.webp" alt="Firefox and Task Manager on ReactOS"> |
-| **Visual Studio Code.** NitroOS: VS Code 1.145.2 (Scoop `vscode`), editing a file. ReactOS: the official 64-bit `Code.exe` (238,751,544 bytes) from the portable build, run in `cmd`: "Bad command or filename". | <img src="docs/img/nitro-vscode.webp" alt="VS Code on NitroOS"> | <img src="docs/img/reactos-vscode.webp" alt="Code.exe on ReactOS fails to run"> |
-| **PowerShell 7.** NitroOS: `$PSVersionTable`, PowerShell 7.6.9. ReactOS: `pwsh` from Run: "The system cannot find the file specified" (it is not included; we did not test installing it by hand). | <img src="docs/img/nitro-powershell7.webp" alt="PowerShell 7 on NitroOS"> | <img src="docs/img/reactos-powershell7.webp" alt="pwsh not found on ReactOS"> |
-| **A .NET Framework 4.8 WinForms program.** Same `demo.exe` (6,144 bytes, built in the NitroOS VM with the .NET 4.8 `csc.exe` from [`docs/demo/app.cs`](docs/demo/app.cs)). NitroOS: window opens, controls work. ReactOS: the program returns to the prompt at once (exit code 0), with no window, no error and no process left (`tasklist`). | <img src="docs/img/nitro-dotnet.webp" alt=".NET WinForms demo on NitroOS"> | <img src="docs/img/reactos-dotnet.webp" alt="demo.exe does nothing on ReactOS"> |
-| **Getting more software.** NitroOS: the Features dialog with the AAC decoder and Scoop ticked, then the installer progress. ReactOS: the Applications Manager (404 entries) searched for "firefox", then installing Firefox 52.9 ESR. | <img src="docs/img/nitro-features.webp" alt="NitroOS Features dialog"><br><img src="docs/img/nitro-features-installing.webp" alt="Features installing"> | <img src="docs/img/reactos-addons.webp" alt="ReactOS Applications Manager"><br><img src="docs/img/reactos-addons-installing.webp" alt="Applications Manager installing"> |
-| **Setup: file system.** NitroOS: NTFS preselected. ReactOS: FAT. | <img src="docs/img/nitro-format.webp" alt="NitroOS format step"> | <img src="docs/img/reactos-format.webp" alt="ReactOS format step"> |
-| **Setup: summary on the same 4-vCPU VM.** NitroOS: Standard x64 Multiprocessor, `\Windows`. ReactOS: ACPI PC Uniprocessor, `\ReactOS`. | <img src="docs/img/nitro-install.webp" alt="NitroOS setup summary"> | <img src="docs/img/reactos-install.webp" alt="ReactOS setup summary"> |
-| **Firewall.** NitroOS Firewall, "state: On", after a fresh install. | <img src="docs/img/nitro-firewall.webp" alt="NitroOS Firewall"> | not tested on ReactOS |
-
-### Why the comparison is 32-bit ReactOS
-
-Stock ReactOS has no released 64-bit build. We tried the newest 64-bit upstream we could get:
-
-- **Official 64-bit nightly** (`reactos-bootcd-0.4.17-dev-1340-gfaa2d03-x64-msvc-win-dbg`, sha256 `ff00293f…1052a`, a debug build): its default boot entry stops at *"You need to connect a debugger on port COM1"* ([screenshot](docs/img/reactos-amd64-nightly-default.webp)); choosing "ReactOS Setup (Text Mode)" instead ends in a blue screen, `STOP: 0x0000001E`, in `cdfs.sys` ([screenshot](docs/img/reactos-amd64-nightly-bsod.webp)).
-- **Upstream master built as Release** (`4d1f0148bed`, lane `bench4`): Setup stops with `STOP 0x71 SESSION5_INITIALIZATION_FAILED` about 11 s after start, reproduced three times in total.
-
-So the ReactOS side of every comparison above is the 32-bit release. This is a statement about the images we ran on 2026-11-08, not about the ReactOS project's plans.
+| | |
+|---|---|
+| <a href="docs/img/nitro-desktop.webp"><img src="docs/img/nitro-desktop.webp" alt="The desktop, 1024x768"></a><br>The desktop, 1024x768 | <a href="docs/img/nitro-winver.webp"><img src="docs/img/nitro-winver.webp" alt="About: NT 10.0, build 19045; 3.99 GB of 4 GB usable"></a><br>About: NT 10.0, build 19045; 3.99 GB of 4 GB usable |
+| <a href="docs/img/nitro-browser.webp"><img src="docs/img/nitro-browser.webp" alt="Chrome 157 on a real https page"></a><br>Chrome 157 on a real https page | <a href="docs/img/nitro-firefox-64-32.webp"><img src="docs/img/nitro-firefox-64-32.webp" alt="64-bit and 32-bit Firefox side by side; Task Manager marks 32-bit processes with *32"></a><br>64-bit and 32-bit Firefox side by side; Task Manager marks 32-bit processes with `*32` |
+| <a href="docs/img/nitro-vscode.webp"><img src="docs/img/nitro-vscode.webp" alt="Visual Studio Code 1.145"></a><br>Visual Studio Code 1.145 | <a href="docs/img/nitro-powershell7.webp"><img src="docs/img/nitro-powershell7.webp" alt="PowerShell 7.6"></a><br>PowerShell 7.6 |
+| <a href="docs/img/nitro-dotnet.webp"><img src="docs/img/nitro-dotnet.webp" alt=".NET Framework 4.8 WinForms program, built inside the VM"></a><br>.NET Framework 4.8 WinForms program, built inside the VM | <a href="docs/img/nitro-features.webp"><img src="docs/img/nitro-features.webp" alt="Features dialog: optional components on demand"></a><br>Features dialog: optional components on demand |
+| <a href="docs/img/nitro-features-installing.webp"><img src="docs/img/nitro-features-installing.webp" alt="Features installing the selected components"></a><br>Features installing the selected components | <a href="docs/img/nitro-format.webp"><img src="docs/img/nitro-format.webp" alt="Setup: NTFS preselected"></a><br>Setup: NTFS preselected |
+| <a href="docs/img/nitro-install.webp"><img src="docs/img/nitro-install.webp" alt="Setup summary: multiprocessor kernel, installs to \Windows"></a><br>Setup summary: multiprocessor kernel, installs to `\Windows` | <a href="docs/img/nitro-firewall.webp"><img src="docs/img/nitro-firewall.webp" alt="NitroOS Firewall, on after a fresh install"></a><br>NitroOS Firewall, on after a fresh install |
 
 ## Download
 

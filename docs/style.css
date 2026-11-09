@@ -42,3 +42,10 @@ code,pre{background:var(--deep);border:1px solid var(--harbor);border-radius:6px
 code{padding:1px 5px}pre{padding:14px;overflow-x:auto}
 footer{border-top:1px solid var(--harbor);background:var(--deep);padding:28px 0;font-size:14px;color:#9aa0c8}
 ul.tight{padding-left:20px}ul.tight li{margin:4px 0}
+
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:18px}
+.gallery figure{margin:0}
+.gallery img{width:100%;height:auto;display:block;border-radius:8px;border:1px solid var(--harbor);background:var(--deep);cursor:zoom-in}
+.gallery figcaption{font-size:14px;color:#aab0d8;margin-top:6px}
+.hero a img.shot{cursor:zoom-in}
+@media(max-width:760px){.gallery{grid-template-columns:1fr}}
