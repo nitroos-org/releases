@@ -1,4 +1,61 @@
-# Benchmarks — reactos-nitro vs ReactOS master
+# Benchmarks
+
+Two comparisons. The first, NitroOS against the ReactOS code it is built on, is the one shown on [nitroos.org](https://nitroos.org/#numbers). The second compares NitroOS with LiberNT, another ReactOS-based operating system, and with Windows 10, all on the same virtual hardware. We measure against both to know where NitroOS stands and what to work on next.
+
+All tests are our own small programs (plus 7-Zip's built-in benchmark), run in virtual machines on one host. They are not a substitute for real-hardware testing.
+
+## 1. NitroOS and the ReactOS code it builds on
+
+Measured 2026-11-08 on one host (AMD EPYC 9254, QEMU/KVM), 4 virtual CPUs, 4 GB of memory, median of 5 runs, 32-bit builds of both, both systems on FAT. ReactOS: upstream master `4d1f0148bed`. NitroOS: development build `a690f0ba892`. The table and notes are on [nitroos.org](https://nitroos.org/#numbers) and in the [README](README.md#speed).
+
+## 2. NitroOS, LiberNT and Windows 10 on the same virtual hardware
+
+Measured 2026-11-09 on one host (AMD EPYC 9254, QEMU 8.2.2 with KVM). Every system ran in a fresh virtual machine with the same machine model (q35), an AHCI disk, 4 virtual CPUs (`-cpu host`), 4 GB of memory and user-mode networking.
+
+- **NitroOS:** development build `7e36c6805c6` (64-bit, with 32-bit support, memory paging on). It booted with legacy BIOS (SeaBIOS), because booting NitroOS with UEFI is not verified yet; the other two booted with UEFI (OVMF).
+- **LiberNT:** build `1c538150eaa` of 9 November 2026. LiberNT publishes Debug builds only, and Debug builds are usually slower than release builds, so read its column with that in mind.
+- **Windows 10:** 22H2 evaluation, 10.0.19045.2006, Microsoft Defender on (the benchmark folder excluded), default paging file.
+
+Each figure is the median over 4 rounds of 5 runs, with the systems interleaved and a fresh virtual machine for each round. In the last two columns, a value above 1 means NitroOS is better.
+
+| Test | Unit | Windows 10 | NitroOS | LiberNT | NitroOS vs LiberNT | NitroOS vs Windows 10 |
+|---|---|--:|--:|--:|--:|--:|
+| VirtualAlloc commit/decommit (32768 pages) | ms | 35.15 | 15.06 | 16.67 | 1.11 | 2.33 |
+| Demand-zero page faults (steady) | thousand pages/s | 3,406 | 1,195 | 1,211 | 0.99 | 0.35 |
+| File-mapped page faults | thousand pages/s | 1,118 | 933 | 97.58 | 9.56 | 0.83 |
+| Copy-on-write faults | thousand pages/s | 526 | 378 | 82.74 | 4.57 | 0.72 |
+| HeapAlloc/free (1M) | ms | 50.49 | 113 | 141 | 1.25 | 0.45 |
+| Heap, 4 threads | ms | 28.11 | 219 | 487 | 2.22 | 0.13 |
+| Event create/close (100k) | ms | 52.53 | 39.59 | 52.15 | 1.32 | 1.33 |
+| Mutex+semaphore (50k) | ms | 55.64 | 42.05 | 52.54 | 1.25 | 1.32 |
+| File open/close (30k) | ms | 288 | 350 | 343 | 0.98 | 0.82 |
+| WaitForSingleObject (1M) | ms | 219 | 115 | 203 | 1.77 | 1.91 |
+| Registry open/close (100k) | ms | 360 | 314 | 553 | 1.76 | 1.15 |
+| GetFileAttributes (200k) | ms | 1,941 | 1,720 | 4,553 | 2.65 | 1.13 |
+| Thread create+join (20k) | ms | 5,043 | 968 | 2,367 | 2.45 | 5.21 |
+| Event ping-pong (50k) | ms | 3,224 | 249 | 1,306 | 5.25 | 12.95 |
+| CreateProcess+wait (200) | ms | 769 | 363 | 458 | 1.26 | 2.12 |
+| cmd.exe /c exit x50 | ms | 284 | 117 | 330 | 2.81 | 2.42 |
+| Create 10k small files | ms | 1,693 | 3,681 | 2,700 | 0.73 | 0.46 |
+| Read 10k small files | ms | 158 | 347 | 344 | 0.99 | 0.46 |
+| Delete 10k small files | ms | 559 | 726 | 3,716 | 5.12 | 0.77 |
+| Enumerate a 10k-file directory x20 | ms | 50.88 | 144 | 169 | 1.17 | 0.35 |
+| Sequential read 1 GB (cached) | MB/s | 8,185 | 1,612 | 383 | 4.21 | 0.20 |
+| Sequential write 1 GB (cached) | MB/s | 960 | 699 | 1,121 | 0.62 | 0.73 |
+| Sequential read 1 GB (no buffering) | MB/s | 1,480 | 1,392 | 1,394 | 1.00 | 0.94 |
+| Sequential write 1 GB (no buffering) | MB/s | 961 | 426 | 1,127 | 0.38 | 0.44 |
+| 7-Zip benchmark total (x64) | MIPS (higher is better) | 33,950 | 29,790 | 29,700 | 1.00 | 0.88 |
+| 7-Zip benchmark total (x86) | MIPS (higher is better) | 25,230 | 22,060 | 22,130 | 1.00 | 0.87 |
+
+**Summary.** Across the 32 measured values (geometric mean of the ratios), NitroOS is 1.69 times better than LiberNT (better on 23, level on 6, behind on 3: both sequential-write tests and small-file creation) and 0.96 times Windows 10 (better on 15, behind on 16).
+
+**With 1 GB of memory** and a 1.4 GB working set, all three systems complete. The second pass over the working set takes about 1 s on Windows 10, 37 s on LiberNT and 56 to 72 s on NitroOS. At 1 GB, NitroOS is also behind LiberNT on NTFS directory listing and small-file reads, because its file-system caches shrink with the amount of memory.
+
+**What we are working on** for the next releases: sequential writes, small-file creation, file-system caching on small machines, paging speed, and the multi-threaded heap.
+
+## History: 2026.10 measurements
+
+The numbers below are from a development build of October 2026 and are kept for reference only.
 
 > **Not re-measured for 2026.10-5.** These numbers come from a development build that predates `nitro-2026.10-1` (see below) and have not been re-measured for this release; they do not reflect the Windows 10 identity default, the memory commit cap or other changes since.
 >
