@@ -30,19 +30,36 @@ This repository (`nitroos-org/releases`, formerly "reactos-nitro") publishes the
 
 ## Major enhancements
 
-What NitroOS adds on top of ReactOS. Each point links to a screenshot or a measured number.
+What NitroOS adds on top of ReactOS, in release 2026.11-1.
 
-| Enhancement | Evidence |
+| Enhancement | What you get |
 |---|---|
-| **Current apps run.** Chrome 157, Firefox 159, Visual Studio Code 1.145 and PowerShell 7.6 start and work (versions seen on 2026-11-08). | [browser](#screenshots), [VS Code](#screenshots), [PowerShell 7](#screenshots) |
-| **32-bit and 64-bit programs side by side.** 64-bit Firefox and 32-bit Firefox run at the same time; Task Manager marks the 32-bit processes with `*32`. | [Task Manager](#screenshots) |
-| **.NET Framework 4.8 programs run.** A WinForms program built inside the VM with the .NET 4.8 compiler starts and its controls work (CLR 4.0.30319.42000). | [.NET](#screenshots) |
-| **A Windows 10-compatible version number.** The system reports NT 10.0, build 19045, so installers and apps that check the version proceed. | [About dialog](#screenshots) |
-| **The whole 4 GB is usable.** 3.99 GB of 4 GB shows as installed memory, and Setup picks the multiprocessor kernel on a multi-CPU machine. | [About dialog](#screenshots), [Setup summary](#screenshots) |
-| **NTFS by default.** Setup offers NTFS and preselects it. | [Setup, format step](#screenshots) |
-| **A firewall that is on.** NitroOS Firewall reports state "On" for the private network after a fresh install. | [Firewall](#screenshots) |
-| **Features on demand.** A Features dialog turns on PowerShell 7, Scoop, .NET Framework 4.8, Firefox, the AAC audio decoder and more, and downloads them when ticked. | [Features](#screenshots) |
-| **Faster memory paths** than the ReactOS code it builds on (measured on 32-bit builds of both): see [the numbers](#speed). | table below |
+| **Apps** | |
+| Current apps run | Chrome 157, Firefox 159, Edge (with its own sandbox on), VS Code 1.145 and PowerShell 7.6 start and work. ([screenshots](#screenshots)) |
+| 32-bit and 64-bit together | 32-bit programs run on the 64-bit system (WoW64). 64-bit and 32-bit Firefox run at the same time; Task Manager marks 32-bit processes with `*32`. ([screenshots](#screenshots)) |
+| .NET Framework 4.8 and PowerShell 7 | .NET 4.8 WinForms programs run. PowerShell 7 is preinstalled, with NetAdapter, NetTCPIP, DnsClient, Storage, ScheduledTasks and LocalAccounts modules. ([screenshots](#screenshots)) |
+| Windows 10 identity | Reports NT 10.0, build 19045, so installers and apps that check the version proceed. ([screenshots](#screenshots)) |
+| Features on demand | A Features dialog (and `featmgr` on the command line) installs PowerShell 7, Scoop, .NET 4.8, Firefox, Gecko, the AAC decoder, the GPU pack and WinFsp, with their dependencies. ([screenshots](#screenshots)) |
+| Terminals and scheduled tasks | ConPTY pseudoconsoles for the VS Code terminal, Windows Terminal and PowerShell 7. Task Scheduler 2.0: app update tasks fire. |
+| **System** | |
+| All CPUs, all memory | Multi-processor kernel by default on x86 and amd64; 3.99 GB of 4 GB usable. ([screenshots](#screenshots)) |
+| A memory pager | On by default on amd64: unused memory is paged out, and programs can commit up to RAM plus the paging file. A runaway program gets an allocation failure instead of taking the system down. |
+| Measured speed-ups | 134x faster demand-zero page faults, 66x faster copy-on-write faults, 10.6x faster heap than the ReactOS code it builds on. ([numbers](#speed)) |
+| An accurate clock in VMs | Time is taken from the hypervisor's TSC frequency: drift of 0.004% or less under heavy load. |
+| **Files and storage** | |
+| Disk Management | A Windows 7-style Disk Management (`diskmgmt.msc`) with a graphical disk layout: Initialize Disk (MBR or GPT), New Simple Volume, Extend and Shrink Volume, Format, and Change Drive Letter and Paths, from a right-click menu on each block. A greyed-out item says why in the status bar. Before writing, it checks it is changing the disk and partition table you saw, and reads the result back. |
+| NTFS by default | A read/write NTFS driver built on the Linux kernel's `fs/ntfs`, with a journal, replay after a power cut and chkdsk. Setup preselects it. ([screenshots](#screenshots)) |
+| Btrfs | WinBtrfs 1.10 with our fixes: volumes made by current btrfs-progs mount, `format /FS:BTRFS` works and drive letters stick. Block group tree, free-space bitmaps and compressed inline files. |
+| WinFsp file systems | WinFsp 2.x installs and mounts user-mode file systems on drive letters and UNC paths. |
+| **Devices and graphics** | |
+| Device Manager that does what it says | Disabling a device lasts across restarts (the boot device is protected), a failed enable or disable is reported, and installing a driver over a running device restarts it. Driver installs run in a service from a protected copy. |
+| Graphics | A virtio-gpu display driver; Mesa OpenGL (llvmpipe) and Vulkan (lavapipe) in the GPU pack on amd64; first stages of Windows.UI.Composition and DirectComposition, so WebView2 and Edge render. |
+| **Networking and security** | |
+| A firewall that is on | Inbound and outbound filtering on after a fresh install, Windows-format rules, firewall.cpl, wf.msc and a prompt when a blocked program starts listening. ([screenshots](#screenshots)) |
+| Networking for everyone | Standard users can use TCP and UDP sockets; ipconfig and net show what Windows shows; HTTP Server API, `netsh portproxy`, schannel TLS. |
+| Hardening | Registry security descriptors, grouped security fixes across the kernel, win32k and networking, and sandboxed browsers. |
+| **Desktop** | |
+| Comfortable desktop | LCD text rendering, bundled open fonts, crash reports in a Windows-style dialog, console copy and paste with Ctrl+C/Ctrl+V and mouse selection, installs to `C:\Windows`. |
 
 ### Speed
 

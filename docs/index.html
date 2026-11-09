@@ -5,39 +5,64 @@
 <link rel="icon" type="image/png" sizes="32x32" href="img/brand/favicon-32.png"><link rel="icon" type="image/png" sizes="16x16" href="img/brand/favicon-16.png">
 <link rel="stylesheet" href="style.css"></head><body>
 <header class="top"><div class="wrap"><a href="#"><img src="img/brand/lockup-640.png" alt="NitroOS"></a>
-<nav><a href="#why">Enhancements</a><a href="#screenshots">Screenshots</a><a href="#numbers">Speed</a><a href="#tech">Details</a><a href="#download">Download</a><a href="#limits">Limitations</a><a href="https://github.com/nitroos-org">GitHub</a></nav></div></header>
+<input type="checkbox" id="navtoggle" class="navtoggle" aria-hidden="true"><label for="navtoggle" class="navbtn" aria-label="Menu">&#9776; Menu</label>
+<nav id="mainnav"><a href="#why">Enhancements</a><a href="#screenshots">Screenshots</a><a href="#numbers">Speed</a><a href="#tech">Details</a><a href="#download">Download</a><a href="#limits">Limitations</a><a href="https://github.com/nitroos-org">GitHub</a></nav></div></header>
 <div class="hero"><div class="wrap">
 <h1>An open-source, Windows-compatible operating system, built on ReactOS</h1>
 <p class="lead">That is our aim. NitroOS takes <a href="https://reactos.org">ReactOS</a> and adds major enhancements: current 64-bit and 32-bit apps side by side, .NET Framework 4.8, PowerShell 7, NTFS by default and a firewall that is on. Release 2026.11-1.</p>
 <a class="btn" href="#download">Download</a><a class="btn alt" href="https://github.com/nitroos-org/releases">Source and changelog</a>
-<br><a href="img/hero.webp"><img class="shot" src="img/hero.webp" alt="NitroOS running Chrome, Visual Studio Code and the Features dialog" width="1100"></a>
+<br><a href="img/hero.webp"><img class="shot" src="img/hero.webp" alt="NitroOS running Chrome, Visual Studio Code and the Features dialog" width="1100" height="358"></a>
 </div></div>
 <div class="wrap"><div class="notice"><b>Unofficial.</b> NitroOS is a build based on <a href="https://reactos.org">ReactOS</a> and is not affiliated with or endorsed by the ReactOS project. ReactOS is a trademark of the ReactOS project. Report problems from NitroOS to <a href="https://github.com/nitroos-org/releases/issues">this project</a>, not to ReactOS. Alpha-quality software: use a virtual machine. Tested under QEMU/KVM only.</div></div>
-<section id="why"><div class="wrap"><h2>Major enhancements</h2><p class="sub">What NitroOS adds on top of ReactOS. Each one has a screenshot below or a measured number.</p>
-<div class="cards">
-<div class="card"><h3>Current apps run</h3><p>Chrome 157, Firefox 159, VS Code 1.145 and PowerShell 7.6 start and work.</p></div>
-<div class="card"><h3>32-bit and 64-bit together</h3><p>64-bit and 32-bit Firefox run at the same time; Task Manager marks 32-bit processes with <code>*32</code>.</p></div>
-<div class="card"><h3>.NET Framework 4.8</h3><p>A WinForms program built in the VM runs (CLR 4.0.30319.42000).</p></div>
-<div class="card"><h3>Version 10.0 identity</h3><p>Reports NT 10.0, build 19045, so installers that check the version proceed.</p></div>
-<div class="card"><h3>NTFS and a firewall</h3><p>Setup preselects NTFS, uses all CPUs and all 4 GB; the firewall is on after a fresh install.</p></div>
-<div class="card"><h3>Features on demand</h3><p>A Features dialog installs PowerShell 7, Scoop, .NET 4.8, Firefox, the AAC decoder and more.</p></div>
-<div class="card"><h3>Measured speed-ups</h3><p>134x faster demand-zero page faults, 66x faster copy-on-write faults, 10.6x faster heap, compared with the ReactOS code it builds on (32-bit builds, single-threaded tests).</p></div>
-</div></div></section>
+<section id="why"><div class="wrap"><h2>Major enhancements</h2><p class="sub">What NitroOS adds on top of ReactOS, in release 2026.11-1.</p>
+<h3 class="grouphead">Apps</h3><div class="cards">
+<div class="card"><h3>Current apps run</h3><p>Chrome 157, Firefox 159, Edge (with its own sandbox on), VS Code 1.145 and PowerShell 7.6 start and work. <a href="#screenshots">Screenshots</a></p></div>
+<div class="card"><h3>32-bit and 64-bit together</h3><p>32-bit programs run on the 64-bit system (WoW64). 64-bit and 32-bit Firefox run at the same time; Task Manager marks 32-bit processes with <code>*32</code>. <a href="#screenshots">Screenshots</a></p></div>
+<div class="card"><h3>.NET Framework 4.8 and PowerShell 7</h3><p>.NET 4.8 WinForms programs run. PowerShell 7 is preinstalled, with NetAdapter, NetTCPIP, DnsClient, Storage, ScheduledTasks and LocalAccounts modules. <a href="#screenshots">Screenshots</a></p></div>
+<div class="card"><h3>Windows 10 identity</h3><p>Reports NT 10.0, build 19045, so installers and apps that check the version proceed. <a href="#screenshots">Screenshots</a></p></div>
+<div class="card"><h3>Features on demand</h3><p>A Features dialog (and <code>featmgr</code> on the command line) installs PowerShell 7, Scoop, .NET 4.8, Firefox, Gecko, the AAC decoder, the GPU pack and WinFsp, with their dependencies. <a href="#screenshots">Screenshots</a></p></div>
+<div class="card"><h3>Terminals and scheduled tasks</h3><p>ConPTY pseudoconsoles for the VS Code terminal, Windows Terminal and PowerShell 7. Task Scheduler 2.0: app update tasks fire.</p></div>
+</div>
+<h3 class="grouphead">System</h3><div class="cards">
+<div class="card"><h3>All CPUs, all memory</h3><p>Multi-processor kernel by default on x86 and amd64; 3.99 GB of 4 GB usable. <a href="#screenshots">Screenshots</a></p></div>
+<div class="card"><h3>A memory pager</h3><p>On by default on amd64: unused memory is paged out, and programs can commit up to RAM plus the paging file. A runaway program gets an allocation failure instead of taking the system down.</p></div>
+<div class="card"><h3>Measured speed-ups</h3><p>134x faster demand-zero page faults, 66x faster copy-on-write faults, 10.6x faster heap than the ReactOS code it builds on. <a href="#numbers">Numbers</a></p></div>
+<div class="card"><h3>An accurate clock in VMs</h3><p>Time is taken from the hypervisor's TSC frequency: drift of 0.004% or less under heavy load.</p></div>
+</div>
+<h3 class="grouphead">Files and storage</h3><div class="cards">
+<div class="card"><h3>Disk Management</h3><p>A Windows 7-style Disk Management (<code>diskmgmt.msc</code>) with a graphical disk layout: Initialize Disk (MBR or GPT), New Simple Volume, Extend and Shrink Volume, Format, and Change Drive Letter and Paths, from a right-click menu on each block. A greyed-out item says why in the status bar. Before writing, it checks it is changing the disk and partition table you saw, and reads the result back.</p></div>
+<div class="card"><h3>NTFS by default</h3><p>A read/write NTFS driver built on the Linux kernel's <code>fs/ntfs</code>, with a journal, replay after a power cut and chkdsk. Setup preselects it. <a href="#screenshots">Screenshots</a></p></div>
+<div class="card"><h3>Btrfs</h3><p>WinBtrfs 1.10 with our fixes: volumes made by current btrfs-progs mount, <code>format /FS:BTRFS</code> works and drive letters stick. Block group tree, free-space bitmaps and compressed inline files.</p></div>
+<div class="card"><h3>WinFsp file systems</h3><p>WinFsp 2.x installs and mounts user-mode file systems on drive letters and UNC paths.</p></div>
+</div>
+<h3 class="grouphead">Devices and graphics</h3><div class="cards">
+<div class="card"><h3>Device Manager that does what it says</h3><p>Disabling a device lasts across restarts (the boot device is protected), a failed enable or disable is reported, and installing a driver over a running device restarts it. Driver installs run in a service from a protected copy.</p></div>
+<div class="card"><h3>Graphics</h3><p>A virtio-gpu display driver; Mesa OpenGL (llvmpipe) and Vulkan (lavapipe) in the GPU pack on amd64; first stages of Windows.UI.Composition and DirectComposition, so WebView2 and Edge render.</p></div>
+</div>
+<h3 class="grouphead">Networking and security</h3><div class="cards">
+<div class="card"><h3>A firewall that is on</h3><p>Inbound and outbound filtering on after a fresh install, Windows-format rules, firewall.cpl, wf.msc and a prompt when a blocked program starts listening. <a href="#screenshots">Screenshots</a></p></div>
+<div class="card"><h3>Networking for everyone</h3><p>Standard users can use TCP and UDP sockets; ipconfig and net show what Windows shows; HTTP Server API, <code>netsh portproxy</code>, schannel TLS.</p></div>
+<div class="card"><h3>Hardening</h3><p>Registry security descriptors, grouped security fixes across the kernel, win32k and networking, and sandboxed browsers.</p></div>
+</div>
+<h3 class="grouphead">Desktop</h3><div class="cards">
+<div class="card"><h3>Comfortable desktop</h3><p>LCD text rendering, bundled open fonts, crash reports in a Windows-style dialog, console copy and paste with Ctrl+C/Ctrl+V and mouse selection, installs to <code>C:\Windows</code>.</p></div>
+</div>
+</div></section>
 <section id="screenshots"><div class="wrap"><h2>Screenshots</h2>
 <p class="sub">NitroOS 2026.11-1 (amd64, branded build) on a fresh VM: 4 vCPU, 4 GB RAM, 1024x768. Screen dumps, not edited. Click a picture for full size.</p>
 <div class="gallery">
-<figure><a href="img/nitro-desktop.webp"><img loading="lazy" src="img/nitro-desktop.webp" alt="The desktop, 1024x768 (NitroOS)"></a><figcaption>The desktop, 1024x768</figcaption></figure>
-<figure><a href="img/nitro-winver.webp"><img loading="lazy" src="img/nitro-winver.webp" alt="About: NT 10.0, build 19045; 3.99 GB of 4 GB usable (NitroOS)"></a><figcaption>About: NT 10.0, build 19045; 3.99 GB of 4 GB usable</figcaption></figure>
-<figure><a href="img/nitro-browser.webp"><img loading="lazy" src="img/nitro-browser.webp" alt="Chrome 157 on a real https page (NitroOS)"></a><figcaption>Chrome 157 on a real https page</figcaption></figure>
-<figure><a href="img/nitro-firefox-64-32.webp"><img loading="lazy" src="img/nitro-firefox-64-32.webp" alt="64-bit and 32-bit Firefox side by side; Task Manager marks 32-bit processes with *32 (NitroOS)"></a><figcaption>64-bit and 32-bit Firefox side by side; Task Manager marks 32-bit processes with <code>*32</code></figcaption></figure>
-<figure><a href="img/nitro-vscode.webp"><img loading="lazy" src="img/nitro-vscode.webp" alt="Visual Studio Code 1.145 (NitroOS)"></a><figcaption>Visual Studio Code 1.145</figcaption></figure>
-<figure><a href="img/nitro-powershell7.webp"><img loading="lazy" src="img/nitro-powershell7.webp" alt="PowerShell 7.6 (NitroOS)"></a><figcaption>PowerShell 7.6</figcaption></figure>
-<figure><a href="img/nitro-dotnet.webp"><img loading="lazy" src="img/nitro-dotnet.webp" alt=".NET Framework 4.8 WinForms program, built inside the VM (NitroOS)"></a><figcaption>.NET Framework 4.8 WinForms program, built inside the VM</figcaption></figure>
-<figure><a href="img/nitro-features.webp"><img loading="lazy" src="img/nitro-features.webp" alt="Features dialog: optional components on demand (NitroOS)"></a><figcaption>Features dialog: optional components on demand</figcaption></figure>
-<figure><a href="img/nitro-features-installing.webp"><img loading="lazy" src="img/nitro-features-installing.webp" alt="Features installing the selected components (NitroOS)"></a><figcaption>Features installing the selected components</figcaption></figure>
-<figure><a href="img/nitro-format.webp"><img loading="lazy" src="img/nitro-format.webp" alt="Setup: NTFS preselected (NitroOS)"></a><figcaption>Setup: NTFS preselected</figcaption></figure>
-<figure><a href="img/nitro-install.webp"><img loading="lazy" src="img/nitro-install.webp" alt="Setup summary: multiprocessor kernel, installs to \Windows (NitroOS)"></a><figcaption>Setup summary: multiprocessor kernel, installs to <code>\Windows</code></figcaption></figure>
-<figure><a href="img/nitro-firewall.webp"><img loading="lazy" src="img/nitro-firewall.webp" alt="NitroOS Firewall, on after a fresh install (NitroOS)"></a><figcaption>NitroOS Firewall, on after a fresh install</figcaption></figure>
+<figure><a href="img/nitro-desktop.webp"><img loading="lazy" width="1024" height="768" src="img/nitro-desktop.webp" alt="The desktop, 1024x768 (NitroOS)"></a><figcaption>The desktop, 1024x768</figcaption></figure>
+<figure><a href="img/nitro-winver.webp"><img loading="lazy" width="1024" height="768" src="img/nitro-winver.webp" alt="About: NT 10.0, build 19045; 3.99 GB of 4 GB usable (NitroOS)"></a><figcaption>About: NT 10.0, build 19045; 3.99 GB of 4 GB usable</figcaption></figure>
+<figure><a href="img/nitro-browser.webp"><img loading="lazy" width="1024" height="768" src="img/nitro-browser.webp" alt="Chrome 157 on a real https page (NitroOS)"></a><figcaption>Chrome 157 on a real https page</figcaption></figure>
+<figure><a href="img/nitro-firefox-64-32.webp"><img loading="lazy" width="1024" height="768" src="img/nitro-firefox-64-32.webp" alt="64-bit and 32-bit Firefox side by side; Task Manager marks 32-bit processes with *32 (NitroOS)"></a><figcaption>64-bit and 32-bit Firefox side by side; Task Manager marks 32-bit processes with <code>*32</code></figcaption></figure>
+<figure><a href="img/nitro-vscode.webp"><img loading="lazy" width="1024" height="768" src="img/nitro-vscode.webp" alt="Visual Studio Code 1.145 (NitroOS)"></a><figcaption>Visual Studio Code 1.145</figcaption></figure>
+<figure><a href="img/nitro-powershell7.webp"><img loading="lazy" width="1024" height="768" src="img/nitro-powershell7.webp" alt="PowerShell 7.6 (NitroOS)"></a><figcaption>PowerShell 7.6</figcaption></figure>
+<figure><a href="img/nitro-dotnet.webp"><img loading="lazy" width="1024" height="768" src="img/nitro-dotnet.webp" alt=".NET Framework 4.8 WinForms program, built inside the VM (NitroOS)"></a><figcaption>.NET Framework 4.8 WinForms program, built inside the VM</figcaption></figure>
+<figure><a href="img/nitro-features.webp"><img loading="lazy" width="1024" height="768" src="img/nitro-features.webp" alt="Features dialog: optional components on demand (NitroOS)"></a><figcaption>Features dialog: optional components on demand</figcaption></figure>
+<figure><a href="img/nitro-features-installing.webp"><img loading="lazy" width="1024" height="768" src="img/nitro-features-installing.webp" alt="Features installing the selected components (NitroOS)"></a><figcaption>Features installing the selected components</figcaption></figure>
+<figure><a href="img/nitro-format.webp"><img loading="lazy" width="800" height="600" src="img/nitro-format.webp" alt="Setup: NTFS preselected (NitroOS)"></a><figcaption>Setup: NTFS preselected</figcaption></figure>
+<figure><a href="img/nitro-install.webp"><img loading="lazy" width="800" height="600" src="img/nitro-install.webp" alt="Setup summary: multiprocessor kernel, installs to \Windows (NitroOS)"></a><figcaption>Setup summary: multiprocessor kernel, installs to <code>\Windows</code></figcaption></figure>
+<figure><a href="img/nitro-firewall.webp"><img loading="lazy" width="1024" height="768" src="img/nitro-firewall.webp" alt="NitroOS Firewall, on after a fresh install (NitroOS)"></a><figcaption>NitroOS Firewall, on after a fresh install</figcaption></figure>
 </div></div></section>
 <section id="numbers"><div class="wrap"><h2>Speed</h2><p class="sub">NitroOS compared with the upstream ReactOS code it is built on. Same test program, same virtual machine, 32-bit builds of both. Each result says how much faster or slower NitroOS is.</p>
 <div class="tablewrap"><table class="perf"><tr><th>Test</th><th class="n">ReactOS</th><th class="n">NitroOS</th><th>NitroOS is</th></tr>
@@ -88,4 +113,5 @@
 <li>Full list: <a href="https://github.com/nitroos-org/releases#known-limitations">README</a>.</li></ul></div></section>
 <footer><div class="wrap"><p>NitroOS is an unofficial build based on ReactOS and is not affiliated with the ReactOS project. ReactOS is a trademark of the ReactOS project. Other product names in screenshots belong to their owners and are used only to say what a program is compatible with. Distributed under the GPL-2.0-or-later and the per-file licences of ReactOS. Credit to the <a href="https://reactos.org">ReactOS project</a> and its contributors, the Linux kernel <code>fs/ntfs</code> authors, WinBtrfs, Wine and FFmpeg.</p>
 <p><a href="https://github.com/nitroos-org">github.com/nitroos-org</a> · <a href="https://github.com/nitroos-org/releases">releases</a> · <a href="https://github.com/nitroos-org/reactos">source</a> · <a href="https://repo.nitroos.org/releases/">ISO archive</a></p></div></footer>
+<script>document.querySelectorAll("#mainnav a").forEach(function(a){a.addEventListener("click",function(){document.getElementById("navtoggle").checked=false;});});</script>
 </body></html>

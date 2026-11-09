@@ -20,7 +20,7 @@ nav a{margin-left:18px;text-decoration:none;color:var(--mist)}nav a:hover{color:
 section{padding:36px 0}
 h2{color:#fff;font-size:28px;margin:0 0 6px}
 h2+p.sub{color:var(--slate);margin:0 0 22px;color:#9aa0c8}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:16px}
 .card{background:var(--deep);border:1px solid var(--harbor);border-radius:10px;padding:18px}
 .card h3{margin:0 0 6px;color:var(--glow);font-size:18px}
 .card p{margin:0;font-size:15px}
@@ -43,7 +43,7 @@ code{padding:1px 5px}pre{padding:14px;overflow-x:auto}
 footer{border-top:1px solid var(--harbor);background:var(--deep);padding:28px 0;font-size:14px;color:#9aa0c8}
 ul.tight{padding-left:20px}ul.tight li{margin:4px 0}
 
-.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:18px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:18px}
 .gallery figure{margin:0}
 .gallery img{width:100%;height:auto;display:block;border-radius:8px;border:1px solid var(--harbor);background:var(--deep);cursor:zoom-in}
 .gallery figcaption{font-size:14px;color:#aab0d8;margin-top:6px}
@@ -57,8 +57,14 @@ table.perf td.res.up{color:var(--sky)}table.perf td.res.up .bar{background:var(-
 table.perf td.res.down{color:var(--lamp)}table.perf td.res.down .bar{background:var(--lamp)}
 p.note{font-size:14px;color:#aab0d8}
 
-.techgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.techgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:16px}
 .tech{background:var(--deep);border:1px solid var(--harbor);border-radius:10px;padding:18px}
 .tech h3{margin:0 0 6px;color:var(--glow);font-size:18px}
 .tech p,.tech li{font-size:15px}.tech p{margin:0 0 8px}
 .tech p.count{color:#aab0d8;font-size:13px;margin:8px 0 0}
+
+.navtoggle{display:none}.navbtn{display:none;cursor:pointer;color:var(--mist);border:1px solid var(--harbor);border-radius:8px;padding:6px 12px;font-size:15px;user-select:none}
+h3.grouphead{color:var(--sky);font-size:15px;text-transform:uppercase;letter-spacing:.08em;margin:26px 0 10px}
+.card code,.tech code{overflow-wrap:anywhere}
+html,body{overflow-x:hidden}
+@media(max-width:860px){header.top img{height:36px}.navbtn{display:block}header.top nav{display:none;width:100%;flex-direction:column;padding:6px 0 4px}header.top nav a{margin:0;padding:11px 4px;border-top:1px solid var(--harbor);font-size:17px}.navtoggle:checked~nav{display:flex}.hero{padding-top:32px}.hero h1{font-size:28px}table.perf td.res{min-width:0}table.perf td.res .bar{display:none}}
