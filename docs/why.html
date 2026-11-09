@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Why NitroOS</title>
+<meta name="description" content="NitroOS aims to be an open-source, Windows-compatible operating system. It is built on ReactOS, with major enhancements: 64-bit and 32-bit apps side by side, .NET Framework 4.8, PowerShell 7, NTFS and a firewall.">
+<link rel="icon" type="image/png" sizes="32x32" href="img/brand/favicon-32.png"><link rel="icon" type="image/png" sizes="16x16" href="img/brand/favicon-16.png">
+<link rel="stylesheet" href="style.css"></head><body>
+<header class="top"><div class="wrap"><a href="index.html"><img src="img/brand/lockup-640.png" alt="NitroOS"></a>
+<input type="checkbox" id="navtoggle" class="navtoggle" aria-hidden="true"><label for="navtoggle" class="navbtn" aria-label="Menu">&#9776; Menu</label>
+<nav id="mainnav"><a href="index.html">Home</a><a href="why.html">Why</a><a href="index.html#next">Next release</a><a href="index.html#download">Download</a><a href="https://github.com/nitroos-org">GitHub</a></nav></div></header>
+<div class="hero"><div class="wrap">
+<h1>Why NitroOS</h1>
+<p class="lead">We want an open-source operating system that runs Windows software well enough to use every day. Done by hand, that is the work of decades. With AI coding agents, we think it can be months.</p>
+</div></div>
+<section><div class="wrap prose">
+<h2>The problem</h2>
+<p>Windows compatibility is enormous: thousands of APIs, the kernel and driver model, file systems, and thirty years of programs that depend on exactly how all of it behaves. Building that in the open, by hand, takes a very long time. The ReactOS project has been doing it since 1998, and its work is what makes NitroOS possible: the kernel, the Win32 subsystem and most of the user mode come from ReactOS and its contributors.</p>
+
+<h2>Our bet</h2>
+<p>AI coding agents change the speed. In NitroOS, agents investigate bugs, write code and tests, and review each other's work around the clock, under a human maintainer who sets priorities and approves every release. The first NitroOS release came out on 20 October 2026; three weeks and six releases later, Chrome, Firefox, Edge, VS Code, PowerShell 7 and .NET Framework 4.8 programs run, and 32-bit and 64-bit programs run side by side.</p>
+<p>We are finding out how far this goes, in the open.</p>
+
+<h2>What we optimise for</h2>
+<ul class="tight">
+<li><b>Daily use.</b> The programs people actually use come first: browsers, developer tools, PowerShell, .NET, and Office next. A bug that stops a real program beats a gap that nothing uses.</li>
+<li><b>Batteries included.</b> NTFS by default, the firewall on, PowerShell 7 preinstalled, more software one click away in Features. We make the choices; you can change them.</li>
+<li><b>Measured, not claimed.</b> Speed is benchmarked and published, including where we are slower. Compatibility claims come with screenshots.</li>
+<li><b>Ship often.</b> A release every week or two, each with its full changelog.</li>
+</ul>
+
+<h2>The rules we keep</h2>
+<ul class="tight">
+<li><b>Behave like Windows.</b> Where behaviour is unclear, we measure it on a reference Windows installation with test programs we write, and match it, including in security.</li>
+<li><b>Clean room.</b> Public documentation, Wine, Unicode CLDR and other open sources only. Never leaked Microsoft code, never Microsoft SDK headers, never values copied out of Microsoft programs.</li>
+<li><b>Every change reviewed and tested.</b> A different AI model reviews every change, builds and test suites must pass, and real applications are used as smoke tests before anything lands.</li>
+<li><b>Open source.</b> GPL, like ReactOS. ReactOS does not accept AI-generated contributions, and we respect that: we do not submit our changes upstream. How we work is in our <a href="https://github.com/nitroos-org/.github/blob/main/AI-POLICY.md">AI policy</a>.</li>
+</ul>
+
+<h2>Where it stands</h2>
+<p>NitroOS is alpha software, tested in virtual machines. Some apps still fail, and the <a href="index.html#limits">known limitations</a> are listed with every release. The <a href="index.html#next">next release goals</a> say what we are working on now.</p>
+
+<h2>Join in</h2>
+<p>Try it in a virtual machine and <a href="https://github.com/nitroos-org/releases/issues">report what breaks</a>. Patches are welcome at <a href="https://github.com/nitroos-org/reactos">nitroos-org/reactos</a>, including AI-assisted ones (say so in the pull request); see <a href="https://github.com/nitroos-org/.github/blob/main/CONTRIBUTING.md">CONTRIBUTING</a>.</p>
+<p><a class="btn" href="index.html#download">Download NitroOS</a></p>
+</div></section>
+<footer><div class="wrap"><p>NitroOS is based on ReactOS and is not affiliated with the ReactOS project. ReactOS is a trademark of the ReactOS project. Other product names in screenshots belong to their owners and are used only to say what a program is compatible with. Distributed under the GPL-2.0-or-later and the per-file licences of ReactOS. Credit to the <a href="https://reactos.org">ReactOS project</a> and its contributors, the Linux kernel <code>fs/ntfs</code> authors, WinBtrfs, Wine and FFmpeg.</p>
+<p><a href="https://github.com/nitroos-org">github.com/nitroos-org</a> · <a href="https://github.com/nitroos-org/releases">releases</a> · <a href="https://github.com/nitroos-org/reactos">source</a> · <a href="https://repo.nitroos.org/releases/">ISO archive</a></p></div></footer>
+<script>document.querySelectorAll("#mainnav a").forEach(function(a){a.addEventListener("click",function(){document.getElementById("navtoggle").checked=false;});});</script>
+</body></html>

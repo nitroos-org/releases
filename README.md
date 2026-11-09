@@ -29,6 +29,10 @@ This repository (`nitroos-org/releases`, formerly "reactos-nitro") publishes the
 
 **Latest release: `2026.11-1` (2026-11-09)**, on upstream ReactOS base [`e46f4bb1a1e`](https://github.com/reactos/reactos/commit/e46f4bb1a1ea7c722f941231565144fe0c286d3e). 592 changes since 2026.10-5. Everything on this page was produced with that build.
 
+## Why NitroOS
+
+We want an open-source operating system that runs Windows software well enough to use every day. Done by hand, that is the work of decades; ReactOS has been doing it since 1998, and NitroOS is built on its work. With AI coding agents, under a human maintainer, we think it can be months: the first NitroOS release came out on 20 October 2026, and three weeks and six releases later Chrome, Firefox, Edge, VS Code, PowerShell 7 and .NET Framework 4.8 programs run. We optimise for daily use, ship often, measure instead of claiming, and keep to clean-room rules and Windows behaviour. More: [nitroos.org/why](https://nitroos.org/why.html).
+
 ## Major enhancements
 
 What NitroOS adds on top of ReactOS, in release 2026.11-1.
@@ -203,6 +207,19 @@ New installs go to `C:\Windows`, with a junction. The i386 live setup runs with 
 Registry security descriptors and eight grouped hardening sets (file-system links, loader and path handling, LSA, win32k USER, networking and others; details are held back until users have had time to update). The amd64 Release binaries are free of the SEH `__finally` code-generation defect (38 functions were affected, verified by a scan).
 
 <sub>Bug fixes in this area: 18 + 21</sub>
+
+## Next release: 2026.11-2
+
+What we are working on now. Goals, not promises: the changelog of the release says what made it.
+
+| Area | Goal | Status |
+|---|---|---|
+| Faster | Close the gaps in our benchmark suite: file system, cached writes and process start. Directory listing is already about 15 times faster on main. Our goal for 2026.12-1 is to match or beat Windows 10 on the suite. | in progress |
+| Memory | Programs can commit up to RAM plus the paging file when the pager is on (in final testing). | in testing |
+| Locales | Date, number and currency formats closer to Windows, still generated from Unicode CLDR: 13 of 26 .NET culture lines now match Windows, up from 8. | on main |
+| Drivers and VMs | Interrupt connection for KMDF drivers, a log of every missing driver import, ObRegisterCallbacks, and a system volume that grows into a larger virtual disk at first boot. | on main |
+| Security | Two grouped hardening runs a day across the kernel, win32k and networking. | ongoing |
+| Office | Windows.UI.Composition work for Word, which still stops at its splash screen. | in progress |
 
 ## Download
 
