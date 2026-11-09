@@ -74,5 +74,6 @@ ul.credits{columns:2 380px;column-gap:32px;padding-left:20px}ul.credits li{break
 .prose{max-width:820px}.prose h2{margin-top:34px}.prose p,.prose li{font-size:17px}
 .tag{font-size:12px;font-weight:600;color:var(--ink);background:var(--sky);border-radius:10px;padding:2px 8px;vertical-align:middle;margin-left:6px;white-space:nowrap}
 
-nav a.gh{display:inline-flex;align-items:center;gap:8px;vertical-align:middle}nav a.gh .ghicon{display:block}nav a.gh .ghtext{display:none}
-@media(max-width:860px){nav a.gh .ghtext{display:inline}}
+nav a.gh{display:inline-flex;align-items:center;gap:7px;vertical-align:middle;margin-left:22px;padding:6px 14px;border-radius:8px;background:var(--glow);color:var(--ink);font-weight:600}
+nav a.gh:hover{background:#ffe27a;color:var(--ink)}nav a.gh .ghicon{display:block;width:18px;height:18px}
+@media(max-width:860px){header.top nav a.gh{background:none;color:var(--mist);font-weight:400;padding:11px 4px;border-radius:0;margin:0}header.top nav a.gh .ghicon{width:22px;height:22px}}
