@@ -12,6 +12,7 @@ NitroOS is built on ReactOS, with major enhancements: current 64-bit and 32-bit 
   <a href="#download">Download</a> ·
   <a href="#screenshots">Screenshots</a> ·
   <a href="#quick-start">Quick start</a> ·
+  <a href="#technical-details">Technical details</a> ·
   <a href="#known-limitations">Known limitations</a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
   <a href="BENCHMARKS.md">Benchmarks</a>
@@ -81,6 +82,109 @@ NitroOS 2026.11-1 (amd64, fork main `049578fe905` with the NitroOS brand layer a
 | <a href="docs/img/nitro-dotnet.webp"><img src="docs/img/nitro-dotnet.webp" alt=".NET Framework 4.8 WinForms program, built inside the VM"></a><br>.NET Framework 4.8 WinForms program, built inside the VM | <a href="docs/img/nitro-features.webp"><img src="docs/img/nitro-features.webp" alt="Features dialog: optional components on demand"></a><br>Features dialog: optional components on demand |
 | <a href="docs/img/nitro-features-installing.webp"><img src="docs/img/nitro-features-installing.webp" alt="Features installing the selected components"></a><br>Features installing the selected components | <a href="docs/img/nitro-format.webp"><img src="docs/img/nitro-format.webp" alt="Setup: NTFS preselected"></a><br>Setup: NTFS preselected |
 | <a href="docs/img/nitro-install.webp"><img src="docs/img/nitro-install.webp" alt="Setup summary: multiprocessor kernel, installs to \Windows"></a><br>Setup summary: multiprocessor kernel, installs to `\Windows` | <a href="docs/img/nitro-firewall.webp"><img src="docs/img/nitro-firewall.webp" alt="NitroOS Firewall, on after a fresh install"></a><br>NitroOS Firewall, on after a fresh install |
+
+## Technical details
+
+The major changes and notable bug fixes in 2026.11-1, by area. The release has 592 changes in total; [`CHANGELOG.md`](CHANGELOG.md) lists every one, with a link to its commit.
+
+### Memory manager and cache
+
+NitroPager, on by default on amd64: working-set trimming and paging of private memory, a low-water balancer and a pager test suite (i386 keeps it off; `NitroPager=0` turns it off). Commit limit is RAM plus paging files, placeholder memory (`NtAllocateVirtualMemoryEx`).
+
+- A section view fault builds its page tables before taking the segment lock (lock-order deadlock with the lazy writer at low memory, bugcheck 0x7A).
+- `CcCopyRead`/`CcCopyWrite` keep the shared cache map referenced for the call (the lazy writer could delete it underneath: bugcheck).
+- A driver image load waits for the balancer, bounded, instead of failing or taking an unusable page.
+
+<sub>Bug fixes in this area: 36 + 8 I/O</sub>
+
+### Heap and locks
+
+`RtlEnterCriticalSection` spins up to the section's spin count before waiting, without barging past queued waiters; user-mode heaps get a small-block front end. The heap is about 30x faster under contention.
+
+### Kernel, scheduler and exceptions
+
+Foreground boost and quantum work, amd64 user hardware breakpoints and debug registers, XState contexts as on Windows, QPC in user mode, `NtSetInformationKey`, `NtAlertThreadByThreadId`/`NtWaitForAlertByThreadId`.
+
+- `NtCreateThread` captures the CONTEXT and INITIAL_TEB once and checks them before the process handle.
+- A ready foreground thread behind a busy background thread of the same priority gets a decaying boost.
+- A terminating thread runs at low real-time priority, so `TerminateProcess` of an idle-class process under load completes promptly.
+
+<sub>Bug fixes in this area: 25 + 31</sub>
+
+### WoW64 (32-bit programs on 64-bit)
+
+System call overhead drops from about 245 ns to about 92 ns: plain services skip FXSAVE, and APC dispatch and `Get/SetThreadContext` take the live x87/SSE state. Also: the 32-bit debug API, WOW64 TEB offset, thread context in 64-bit code, extended handle information, SCSI/ATA pass-through and a 336-entry pointer-free ioctl allow-list.
+
+- The remaining SysWOW64 COM servers (DirectDraw, DirectSound, DirectInput, UI Automation, MSHTML, HTML Help, ADSI) are registered in the 32-bit view.
+- Crash reporter in SysWOW64, `ExitWindowsEx` and console control forwarding.
+
+<sub>Bug fixes in this area: 52</sub>
+
+### NTFS and FAT
+
+NTFS-NG: journal commit without the core lock, POSIX delete, MFT record reuse, chkdsk/autochk, and non-cached writes sent to the device directly, up to 1 MB per request (AHCI sequential write 205 to 358 MB/s in our test). FAT: a checker synced to dosfstools 4.2.
+
+- NTFS-NG only re-zeroes the page the old end of file sits in (growing a file by appends re-zeroed every page: 60-77 s).
+- Byte-range locks belong to their file object: unlocking through one handle no longer releases locks taken through another.
+- fastfat: interlocked volume-state updates and a cleared create-in-progress flag after an exception (the next create bugchecked 0x23).
+
+<sub>Bug fixes in this area: 26 + 11</sub>
+
+### Display, compositor and win32k
+
+Windows.UI.Composition stages 0 to 3 (visual tree) and a minimal DirectComposition: WebView2 controllers and Edge render, with Edge's default sandbox. DirectWrite font fallback, per-desktop win32k work, `UpdateLayeredWindow`.
+
+- `SetParent` works on another process' window as on Windows.
+- Window message behaviour closer to Windows 10, measured on a reference Windows install.
+- Pattern fills honour the DC brush origin in the 8/16/24/32 bpp blitters.
+
+<sub>Bug fixes in this area: 41</sub>
+
+### Networking and firewall
+
+NitroOS Firewall on by default: inbound/outbound filter, rule store in the Windows registry format, firewall.cpl, wf.msc and a block prompt. TCP receive window and loopback, AFD send window and shutdown, `WSASendMsg`, `netsh portproxy`, HTTP Server API, schannel; ipconfig and net.exe output as on Windows.
+
+- `SO_RCVTIMEO` applies to datagram sockets (a UDP receive with a timeout waited forever).
+- Firewall: per-port address-file index (inbound owner lookup about 7x cheaper), address files pin their creator process.
+
+<sub>Bug fixes in this area: 48</sub>
+
+### Console and terminal
+
+ConPTY and VT input: the pseudoconsole that VS Code, Windows Terminal and PowerShell 7 use.
+
+- Ctrl+C copies when text is selected, Ctrl+V pastes, Ctrl+A selects all; QuickEdit is on by default, as on Windows 10.
+- Console programs that own windows get `WM_QUERYENDSESSION`/`WM_ENDSESSION` at shutdown instead of being killed first.
+
+<sub>Bug fixes in this area: 24</sub>
+
+### Applications, COM and Wine 11.21
+
+Sync to Wine 11.21: 55 modules plus comctl32, mshtml, jscript, msxml3/4, urlmon, ieframe and msvcrt. PowerShell 7 preinstalled with clean-room NetAdapter, NetTCPIP, DnsClient, Storage, ScheduledTasks and LocalAccounts modules. Office Click-to-Run installs (Word itself still stops at its splash screen).
+
+- msxml3 XPath parses prefixed function calls such as `ms:string-compare`.
+- DirectPlay8Create returns real objects (dplayx, dpnet synced).
+
+<sub>Bug fixes in this area: 66 + 91</sub>
+
+### Locale data
+
+The 146 locale tables and the calendar data are generated from Unicode CLDR 49 by an in-tree, deterministic generator (`sdk/tools/nlsgen`). Nothing is taken from Windows.
+
+### Setup, storage and drivers
+
+New installs go to `C:\Windows`, with a junction. The i386 live setup runs with DMA (about 1 minute to install in our test VM). NVMe storport miniport; Gecko, AAC and the GPU pack install on demand from Features.
+
+- usbport: two CPUs flushing transfers at once no longer map one transfer twice (endless list walk).
+- i386 Debug installs work again (driver-install lock is a mutex; aligned `TOKEN_USER` buffers).
+
+<sub>Bug fixes in this area: 9 + 20</sub>
+
+### Security and build
+
+Registry security descriptors and eight grouped hardening sets (file-system links, loader and path handling, LSA, win32k USER, networking and others; details are held back until users have had time to update). The amd64 Release binaries are free of the SEH `__finally` code-generation defect (38 functions were affected, verified by a scan).
+
+<sub>Bug fixes in this area: 18 + 21</sub>
 
 ## Download
 

@@ -56,3 +56,9 @@ table.perf td.res .bar{display:inline-block;height:10px;max-width:70px;border-ra
 table.perf td.res.up{color:var(--sky)}table.perf td.res.up .bar{background:var(--sky)}
 table.perf td.res.down{color:var(--lamp)}table.perf td.res.down .bar{background:var(--lamp)}
 p.note{font-size:14px;color:#aab0d8}
+
+.techgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+.tech{background:var(--deep);border:1px solid var(--harbor);border-radius:10px;padding:18px}
+.tech h3{margin:0 0 6px;color:var(--glow);font-size:18px}
+.tech p,.tech li{font-size:15px}.tech p{margin:0 0 8px}
+.tech p.count{color:#aab0d8;font-size:13px;margin:8px 0 0}
