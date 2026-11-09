@@ -5,8 +5,8 @@
   </picture>
 </p>
 
-<p align="center"><b>Our aim: an open-source, Windows-compatible operating system.</b><br>
-NitroOS is built on ReactOS, with major enhancements: current 64-bit and 32-bit apps side by side, .NET Framework 4.8, PowerShell 7, NTFS by default and a firewall that is on.</p>
+<p align="center"><b>An open-source, Windows-compatible operating system, built on ReactOS.</b><br>
+NitroOS builds on ReactOS and adds what you need to use it every day: current 64-bit and 32-bit programs side by side, .NET Framework 4.8, PowerShell 7, NTFS as the default file system and a firewall that is switched on. Latest release: 2026.11-1.</p>
 
 <p align="center">
   <a href="#download">Download</a> ·
@@ -19,161 +19,163 @@ NitroOS is built on ReactOS, with major enhancements: current 64-bit and 32-bit 
   <a href="BENCHMARKS.md">Benchmarks</a>
 </p>
 
-<p align="center"><a href="docs/img/hero.webp"><img alt="NitroOS 2026.11-1 running Chrome, Visual Studio Code and the Features dialog" src="docs/img/hero.webp"></a></p>
+<p align="center"><a href="docs/img/hero.webp"><img alt="NitroOS 2026.11-1 running Chrome, the About dialog and Visual Studio Code" src="docs/img/hero.webp"></a></p>
 
-> **NitroOS is based on [ReactOS](https://reactos.org). It is not affiliated with or endorsed by the ReactOS project.** ReactOS is a trademark of the ReactOS project. **Do not report problems from this build to the ReactOS project; report them here.**
+> **NitroOS is based on [ReactOS](https://reactos.org) and is not affiliated with or endorsed by the ReactOS project.** ReactOS is a trademark of the ReactOS project. **Please report NitroOS problems here, not to ReactOS.**
 >
-> Like ReactOS itself, this is alpha-quality software. Use it in a virtual machine, not on a disk holding data you care about. It was tested under QEMU/KVM only.
+> NitroOS is alpha software. Use it in a virtual machine, not on a disk with data you care about. We have tested it only under QEMU/KVM.
 
-This repository (`nitroos-org/releases`, formerly "reactos-nitro") publishes the NitroOS releases: the installer ISOs, the source of each release, the changelog and the benchmarks. The development fork is [nitroos-org/reactos](https://github.com/nitroos-org/reactos).
+This repository (`nitroos-org/releases`, formerly "reactos-nitro") publishes the NitroOS releases: the installation ISOs, the source code of each release, the changelog and the benchmarks. Development happens in [nitroos-org/reactos](https://github.com/nitroos-org/reactos).
 
-**Latest release: `2026.11-1` (2026-11-09)**, on upstream ReactOS base [`e46f4bb1a1e`](https://github.com/reactos/reactos/commit/e46f4bb1a1ea7c722f941231565144fe0c286d3e). 592 changes since 2026.10-5. Everything on this page was produced with that build.
+**Latest release: `2026.11-1` (9 November 2026)**, based on ReactOS commit [`e46f4bb1a1e`](https://github.com/reactos/reactos/commit/e46f4bb1a1ea7c722f941231565144fe0c286d3e), with 592 changes since 2026.10-5. Unless a section says otherwise, everything on this page refers to that release.
 
 ## Why NitroOS
 
-We want an open-source operating system that runs Windows software well enough to use every day. Done by hand, that is the work of decades: ReactOS has been building it since 1998, and NitroOS stands on that work. With AI coding agents working under a human maintainer, we think it can be months. The first NitroOS release came out on 20 October 2026; three weeks and six releases later, Chrome, Firefox, Edge, VS Code, PowerShell 7 and .NET Framework 4.8 programs run.
+We want an open-source operating system that runs Windows programs well enough to use every day. Building that by hand takes decades: ReactOS has been working on it since 1998, and NitroOS is built on that work. With AI coding agents doing the engineering under a human maintainer, we believe it can take months instead. Our first release came out on 20 October 2026. Three weeks and six releases later, Chrome, Firefox, Edge, VS Code, PowerShell 7 and .NET Framework 4.8 programs run on it.
 
-- **Daily use first:** the programs people actually use, batteries included, a release every week or two.
-- **Measured, not claimed:** benchmarks published, including where we are slower; compatibility shown in screenshots.
-- **Done properly:** behaviour matched to Windows, clean-room sources only, and every change reviewed by a second AI model and tested before it lands.
+- **Made for everyday use.** We work first on the programs people actually use, the system is ready to use straight after installation, and we release every week or two.
+- **Proven, not promised.** We publish our benchmarks, including the tests where we are slower, and we show what works with screenshots.
+- **Built with care.** NitroOS behaves the way Windows does and uses only clean, public sources. Every change is reviewed by a second AI model and tested before it is accepted.
 
-**The end goal is to merge all relevant work back into ReactOS.** ReactOS does not accept AI-generated contributions today, and we respect that. If its policy allows it in the future, we want this work upstream. Until then, NitroOS is an open-source (GPL) downstream; how we work is in our [AI policy](https://github.com/nitroos-org/.github/blob/main/AI-POLICY.md).
+**Our end goal is to merge all relevant work back into ReactOS.** ReactOS does not accept AI-generated code today, and we respect that. If its policy changes, we want this work upstream. Until then, NitroOS is a separate open-source (GPL) project; our [AI policy](https://github.com/nitroos-org/.github/blob/main/AI-POLICY.md) explains how we work.
 
 ## Major enhancements
 
-What NitroOS adds on top of ReactOS, in release 2026.11-1.
+What NitroOS adds to ReactOS, as of release 2026.11-1.
 
-| Enhancement | What you get |
+| | |
 |---|---|
 | **Apps** | |
-| Current apps run | Chrome 157, Firefox 159, Edge (with its own sandbox on), VS Code 1.145 and PowerShell 7.6 start and work. ([screenshots](#screenshots)) |
-| 32-bit and 64-bit together | 32-bit programs run on the 64-bit system (WoW64). 64-bit and 32-bit Firefox run at the same time; Task Manager marks 32-bit processes with `*32`. ([screenshots](#screenshots)) |
-| .NET Framework 4.8 and PowerShell 7 | .NET 4.8 WinForms programs run. PowerShell 7 is preinstalled, with NetAdapter, NetTCPIP, DnsClient, Storage, ScheduledTasks and LocalAccounts modules. ([screenshots](#screenshots)) |
-| Windows 10 identity | Reports NT 10.0, build 19045, so installers and apps that check the version proceed. ([screenshots](#screenshots)) |
-| Features on demand | A Features dialog (and `featmgr` on the command line) installs PowerShell 7, Scoop, .NET 4.8, Firefox, Gecko, the AAC decoder, the GPU pack and WinFsp, with their dependencies. ([screenshots](#screenshots)) |
-| Terminals and scheduled tasks | ConPTY pseudoconsoles for the VS Code terminal, Windows Terminal and PowerShell 7. Task Scheduler 2.0: app update tasks fire. |
+| Current apps | Chrome 157, Firefox 159, Edge, VS Code 1.145 and PowerShell 7.6 install and work. Edge runs with its security sandbox switched on. ([screenshots](#screenshots)) |
+| 32-bit and 64-bit programs together | The 64-bit version also runs 32-bit programs, as Windows does. You can run 64-bit and 32-bit Firefox at the same time; Task Manager marks the 32-bit ones with `*32`. ([screenshots](#screenshots)) |
+| .NET Framework 4.8 and PowerShell 7 | Programs written for .NET Framework 4.8 run. PowerShell 7 comes preinstalled, including its network, storage, scheduled-task and local-account modules. ([screenshots](#screenshots)) |
+| Recognised as Windows 10 | NitroOS reports itself as Windows 10 (version 10.0, build 19045), so installers that check the Windows version carry on instead of refusing. ([screenshots](#screenshots)) |
+| Optional features | The Features dialog (or `featmgr` on the command line) installs extras with one click: PowerShell 7, the Scoop package manager, .NET Framework 4.8, Firefox, an AAC audio decoder, software 3D graphics and WinFsp. ([screenshots](#screenshots)) |
+| Terminals and scheduled tasks | Modern terminals work: the VS Code terminal, Windows Terminal and PowerShell 7. Scheduled tasks run, so programs can keep themselves up to date. |
 | **System** | |
-| All CPUs, all memory | Multi-processor kernel by default on x86 and amd64; 3.99 GB of 4 GB usable. ([screenshots](#screenshots)) |
-| A memory pager | On by default on amd64: unused memory is paged out, and programs can commit up to RAM plus the paging file. A runaway program gets an allocation failure instead of taking the system down. |
-| Measured speed-ups | 134x faster demand-zero page faults, 66x faster copy-on-write faults, 10.6x faster heap than the ReactOS code it builds on. ([numbers](#speed)) |
-| An accurate clock in VMs | Time is taken from the hypervisor's TSC frequency: drift of 0.004% or less under heavy load. |
+| All your CPUs and memory | Multi-processor support is on by default in both the 32-bit and 64-bit versions, and a 4 GB machine shows 3.99 GB of usable memory. ([screenshots](#screenshots)) |
+| Memory paging | On 64-bit, memory that programs are not using is moved to the paging file, so more programs fit. A program that asks for too much memory gets an error instead of bringing down the whole system. |
+| Much faster memory handling | Up to 134 times faster than the ReactOS code it builds on, in our benchmarks. ([numbers](#speed)) |
+| Accurate time in virtual machines | The clock stays accurate even under heavy load (drift of 0.004% or less). |
 | **Files and storage** | |
-| Disk Management | A Windows 7-style Disk Management (`diskmgmt.msc`) with a graphical disk layout: Initialize Disk (MBR or GPT), New Simple Volume, Extend and Shrink Volume, Format, and Change Drive Letter and Paths, from a right-click menu on each block. A greyed-out item says why in the status bar. Before writing, it checks it is changing the disk and partition table you saw, and reads the result back. |
-| NTFS by default | A read/write NTFS driver built on the Linux kernel's `fs/ntfs`, with a journal, replay after a power cut and chkdsk. Setup preselects it. ([screenshots](#screenshots)) |
-| Btrfs | WinBtrfs 1.10 with our fixes: volumes made by current btrfs-progs mount, `format /FS:BTRFS` works and drive letters stick. Block group tree, free-space bitmaps and compressed inline files. |
-| WinFsp file systems | WinFsp 2.x installs and mounts user-mode file systems on drive letters and UNC paths. |
+| Disk Management | A Windows 7-style Disk Management tool that draws each disk and its partitions. Right-click a partition to create, format, extend or shrink a volume or change its drive letter, or set up a new disk as MBR or GPT. If an option is greyed out, the status bar tells you why. Before it changes anything, it checks that the disk is still the way you saw it, and afterwards it checks the result. |
+| NTFS by default | A full read/write NTFS driver, based on the Linux kernel's NTFS code, with a journal that recovers the disk after a power cut, and a disk checker. Setup selects NTFS for you. ([screenshots](#screenshots)) |
+| Btrfs | Updated to WinBtrfs 1.10, with our own fixes: disks formatted on current Linux systems open, `format /FS:BTRFS` works, and drive letters stay the same. |
+| WinFsp | WinFsp installs, so file systems written as ordinary programs can be mounted as drive letters or network paths. |
 | **Devices and graphics** | |
-| Device Manager that does what it says | Disabling a device lasts across restarts (the boot device is protected), a failed enable or disable is reported, and installing a driver over a running device restarts it. Driver installs run in a service from a protected copy. |
-| Graphics | A virtio-gpu display driver; Mesa OpenGL (llvmpipe) and Vulkan (lavapipe) in the GPU pack on amd64; first stages of Windows.UI.Composition and DirectComposition, so WebView2 and Edge render. |
+| A dependable Device Manager | A device you disable stays disabled after a restart (the boot disk is protected from this). If enabling or disabling a device fails, you are told. Installing a new driver for a running device restarts the device so the new driver takes effect. Driver installation runs in a protected system service. |
+| Graphics | A display driver for virtio-gpu virtual machines, optional software OpenGL and Vulkan on 64-bit, and the first parts of Windows' modern composition interfaces, enough for WebView2 and Edge to draw their windows. |
 | **Networking and security** | |
-| A firewall that is on | Inbound and outbound filtering on after a fresh install, Windows-format rules, firewall.cpl, wf.msc and a prompt when a blocked program starts listening. ([screenshots](#screenshots)) |
-| Networking for everyone | Standard users can use TCP and UDP sockets; ipconfig and net show what Windows shows; HTTP Server API, `netsh portproxy`, schannel TLS. |
-| Hardening | Registry security descriptors, grouped security fixes across the kernel, win32k and networking, and sandboxed browsers. |
+| A firewall that is on | The firewall is on from the first boot. It filters incoming and outgoing traffic, stores its rules the same way Windows does, has the usual Control Panel and Advanced Security tools, and asks you when a blocked program tries to accept connections. ([screenshots](#screenshots)) |
+| Networking without administrator rights | Programs running as a standard user can use the network normally. `ipconfig` and `net` show the same output as on Windows, and the HTTP Server API, `netsh portproxy` and TLS through schannel work. |
+| Security hardening | Permissions on the registry, many security fixes across the kernel, the graphics subsystem and networking, and browsers that run inside their security sandbox. |
 | **Desktop** | |
-| Comfortable desktop | LCD text rendering, bundled open fonts, crash reports in a Windows-style dialog, console copy and paste with Ctrl+C/Ctrl+V and mouse selection, installs to `C:\Windows`. |
+| A nicer desktop | Sharper LCD text, extra open fonts, a Windows-style crash report dialog, copy and paste in the console with Ctrl+C and Ctrl+V or the mouse, and Windows installed to `C:\Windows`. |
 
 ### Speed
 
-NitroOS compared with the upstream ReactOS code it is built on: same test program, same virtual machine, 32-bit builds of both. Each result says how much faster or slower NitroOS is.
+How NitroOS compares with the ReactOS code it is built on: the same test program on the same virtual machine, using the 32-bit version of both. Each row shows how much faster or slower NitroOS is.
 
 | Test | ReactOS | NitroOS | NitroOS is |
 |---|--:|--:|---|
 | **Memory** | | | |
-| New memory pages (demand-zero page faults), pages per second | 8,500 | 1,142,000 | 🟢 **134× faster** |
-| Copy-on-write page faults, pages per second | 6,700 | 447,000 | 🟢 **66× faster** |
-| File-mapped page faults, pages per second | 42,900 | 1,115,000 | 🟢 **26× faster** |
-| Heap: 1 million allocate + free | 1.60 s | 0.15 s | 🟢 **10.6× faster** |
-| VirtualAlloc: 32,768 commit + decommit | 69 ms | 13 ms | 🟢 **5.2× faster** |
-| Heap: 4 threads at once | 0.45 s | 12.2 s | 🟠 **27× slower** |
+| Getting new memory (page faults per second) | 8,500 | 1,142,000 | 🟢 **134× faster** |
+| Copy-on-write memory (page faults per second) | 6,700 | 447,000 | 🟢 **66× faster** |
+| Memory-mapped files (page faults per second) | 42,900 | 1,115,000 | 🟢 **26× faster** |
+| Heap: 1 million allocations and frees | 1.60 s | 0.15 s | 🟢 **10.6× faster** |
+| VirtualAlloc: 32,768 commits and decommits | 69 ms | 13 ms | 🟢 **5.2× faster** |
+| Heap: 4 threads allocating at once ‡ | 0.45 s | 12.2 s | 🟠 **27× slower** |
 | **Programs** | | | |
-| Boot to logon screen | 10 s | 6 s | 🟢 **1.7× faster** |
+| Boot to the logon screen | 10 s | 6 s | 🟢 **1.7× faster** |
 | Start `cmd.exe` 50 times † | 0.60 s | 0.29 s | 🟢 **2.1× faster** |
-| Create and wait for 200 processes † | 1.69 s | 0.58 s | 🟢 **2.9× faster** |
+| Start 200 processes and wait for each † | 1.69 s | 0.58 s | 🟢 **2.9× faster** |
 | 7-Zip built-in benchmark (MIPS, higher is better) † | 3,444 | 22,640 | 🟢 **6.6× faster** |
-| Two threads signalling each other (event ping-pong) | 51 ms | 583 ms | 🟠 **11× slower** |
+| Two threads signalling each other ‡ | 51 ms | 583 ms | 🟠 **11× slower** |
 | **Files** | | | |
 | Read 10,000 small files (FAT) | 95 ms | 183 ms | 🟠 **1.9× slower** |
 
-† Uses several CPUs: the 32-bit ReactOS build runs a single-CPU kernel by default, NitroOS uses all 4, so part of that gain comes from the extra CPUs. The slower rows are lock-contention and small-file tests; they are being worked on for 2026.11-2.
+† These tests use several CPUs. The 32-bit ReactOS build uses only one CPU by default, while NitroOS uses all four, so part of the gain comes from the extra CPUs.
 
-Method: lane `bench4`, 2026-11-08, one host (AMD EPYC 9254, QEMU 8.2 with KVM), 4 vCPU, 4 GB, medians of 5 runs, both systems on FAT. NitroOS i386 from main `a690f0ba892`, ReactOS from upstream master `4d1f0148bed`, built the same way. Per-run spread, the 1 GB memory-pressure set and the method: [`BENCHMARKS.md`](BENCHMARKS.md).
+‡ Measured on a development build from before release 2026.11-1. The release's heap and lock improvements make the 4-thread heap test about 30 times faster; the benchmarks will be re-run for 2026.11-2. Small-file reads are being worked on for the same release.
+
+How we measured: on 8 November 2026, on one host (AMD EPYC 9254, QEMU/KVM), with 4 virtual CPUs and 4 GB of memory, taking the median of 5 runs, with both systems on FAT. ReactOS: upstream master `4d1f0148bed`. NitroOS: development build `a690f0ba892`. Per-run spread and the full method: [`BENCHMARKS.md`](BENCHMARKS.md).
 
 ## Screenshots
 
-NitroOS 2026.11-1 (amd64, fork main `049578fe905` with the NitroOS brand layer applied, per `BRAND-APPLY.md`) on a fresh VM: 4 vCPU, 4 GB, 1024x768. Captured with QEMU's screen dump, **not edited**. Click a picture for full size.
+NitroOS 2026.11-1 (64-bit, with NitroOS branding) on a freshly installed virtual machine with 4 CPUs, 4 GB of memory and a 1024x768 screen. These are unedited screen captures. Click a picture to see it full size.
 
 | | |
 |---|---|
-| <a href="docs/img/nitro-desktop.webp"><img src="docs/img/nitro-desktop.webp" alt="The desktop, 1024x768"></a><br>The desktop, 1024x768 | <a href="docs/img/nitro-winver.webp"><img src="docs/img/nitro-winver.webp" alt="About: NT 10.0, build 19045; 3.99 GB of 4 GB usable"></a><br>About: NT 10.0, build 19045; 3.99 GB of 4 GB usable |
-| <a href="docs/img/nitro-browser.webp"><img src="docs/img/nitro-browser.webp" alt="Chrome 157 on a real https page"></a><br>Chrome 157 on a real https page | <a href="docs/img/nitro-firefox-64-32.webp"><img src="docs/img/nitro-firefox-64-32.webp" alt="64-bit and 32-bit Firefox side by side; Task Manager marks 32-bit processes with *32"></a><br>64-bit and 32-bit Firefox side by side; Task Manager marks 32-bit processes with `*32` |
+| <a href="docs/img/nitro-desktop.webp"><img src="docs/img/nitro-desktop.webp" alt="The desktop"></a><br>The desktop | <a href="docs/img/nitro-winver.webp"><img src="docs/img/nitro-winver.webp" alt="About NitroOS: Windows version 10.0, build 19045, with 3.99 GB of 4 GB of memory usable"></a><br>About NitroOS: Windows version 10.0, build 19045, with 3.99 GB of 4 GB of memory usable |
+| <a href="docs/img/nitro-browser.webp"><img src="docs/img/nitro-browser.webp" alt="Chrome 157 showing a website"></a><br>Chrome 157 showing a website | <a href="docs/img/nitro-firefox-64-32.webp"><img src="docs/img/nitro-firefox-64-32.webp" alt="64-bit and 32-bit Firefox running together; Task Manager marks the 32-bit processes with *32"></a><br>64-bit and 32-bit Firefox running together; Task Manager marks the 32-bit processes with `*32` |
 | <a href="docs/img/nitro-vscode.webp"><img src="docs/img/nitro-vscode.webp" alt="Visual Studio Code 1.145"></a><br>Visual Studio Code 1.145 | <a href="docs/img/nitro-powershell7.webp"><img src="docs/img/nitro-powershell7.webp" alt="PowerShell 7.6"></a><br>PowerShell 7.6 |
-| <a href="docs/img/nitro-dotnet.webp"><img src="docs/img/nitro-dotnet.webp" alt=".NET Framework 4.8 WinForms program, built inside the VM"></a><br>.NET Framework 4.8 WinForms program, built inside the VM | <a href="docs/img/nitro-features.webp"><img src="docs/img/nitro-features.webp" alt="Features dialog: optional components on demand"></a><br>Features dialog: optional components on demand |
-| <a href="docs/img/nitro-features-installing.webp"><img src="docs/img/nitro-features-installing.webp" alt="Features installing the selected components"></a><br>Features installing the selected components | <a href="docs/img/nitro-format.webp"><img src="docs/img/nitro-format.webp" alt="Setup: NTFS preselected"></a><br>Setup: NTFS preselected |
-| <a href="docs/img/nitro-install.webp"><img src="docs/img/nitro-install.webp" alt="Setup summary: multiprocessor kernel, installs to \Windows"></a><br>Setup summary: multiprocessor kernel, installs to `\Windows` | <a href="docs/img/nitro-firewall.webp"><img src="docs/img/nitro-firewall.webp" alt="NitroOS Firewall, on after a fresh install"></a><br>NitroOS Firewall, on after a fresh install |
+| <a href="docs/img/nitro-dotnet.webp"><img src="docs/img/nitro-dotnet.webp" alt="A .NET Framework 4.8 Windows Forms program, built inside the virtual machine"></a><br>A .NET Framework 4.8 Windows Forms program, built inside the virtual machine | <a href="docs/img/nitro-features.webp"><img src="docs/img/nitro-features.webp" alt="The Features dialog, for installing optional components"></a><br>The Features dialog, for installing optional components |
+| <a href="docs/img/nitro-features-installing.webp"><img src="docs/img/nitro-features-installing.webp" alt="Features installing the selected components"></a><br>Features installing the selected components | <a href="docs/img/nitro-format.webp"><img src="docs/img/nitro-format.webp" alt="Setup, with NTFS selected"></a><br>Setup, with NTFS selected |
+| <a href="docs/img/nitro-install.webp"><img src="docs/img/nitro-install.webp" alt="Setup summary: multi-processor kernel, installing to \Windows"></a><br>Setup summary: multi-processor kernel, installing to `\Windows` | <a href="docs/img/nitro-firewall.webp"><img src="docs/img/nitro-firewall.webp" alt="NitroOS Firewall, switched on after a fresh install"></a><br>NitroOS Firewall, switched on after a fresh install |
 
 ## Technical details
 
-The major changes and notable bug fixes in 2026.11-1, by area. The release has 592 changes in total; [`CHANGELOG.md`](CHANGELOG.md) lists every one, with a link to its commit.
+For developers: the main changes and notable bug fixes in 2026.11-1, grouped by area. The release contains 592 changes in total; the [changelog](CHANGELOG.md) lists every one, with a link to its commit.
 
 ### Memory manager and cache
 
-NitroPager, on by default on amd64: working-set trimming and paging of private memory, a low-water balancer and a pager test suite (i386 keeps it off; `NitroPager=0` turns it off). Commit limit is RAM plus paging files, placeholder memory (`NtAllocateVirtualMemoryEx`).
+NitroPager is on by default on amd64: it trims working sets and pages out private memory, with a low-water balancer and its own test suite (i386 keeps it off; `NitroPager=0` turns it off). The commit limit is RAM plus the paging files. Placeholder memory (`NtAllocateVirtualMemoryEx`) is supported.
 
-- A section view fault builds its page tables before taking the segment lock (lock-order deadlock with the lazy writer at low memory, bugcheck 0x7A).
-- `CcCopyRead`/`CcCopyWrite` keep the shared cache map referenced for the call (the lazy writer could delete it underneath: bugcheck).
-- A driver image load waits for the balancer, bounded, instead of failing or taking an unusable page.
+- A section view fault builds its page tables before it takes the segment lock. This removes a lock-order deadlock with the lazy writer at low memory (bugcheck 0x7A).
+- `CcCopyRead` and `CcCopyWrite` keep the shared cache map referenced during the call; the lazy writer could delete it underneath them (bugcheck).
+- A driver image load waits for the balancer, for a limited time, instead of failing or taking an unusable page.
 
-<sub>Bug fixes in this area: 36 + 8 I/O</sub>
+<sub>Bug fixes in this area: 44</sub>
 
 ### Heap and locks
 
-`RtlEnterCriticalSection` spins up to the section's spin count before waiting, without barging past queued waiters; user-mode heaps get a small-block front end. The heap is about 30x faster under contention.
+`RtlEnterCriticalSection` spins up to the section's spin count before it waits, without jumping ahead of queued waiters, and user-mode heaps get a small-block front end. Under contention, the heap is about 30 times faster.
 
 ### Kernel, scheduler and exceptions
 
-Foreground boost and quantum work, amd64 user hardware breakpoints and debug registers, XState contexts as on Windows, QPC in user mode, `NtSetInformationKey`, `NtAlertThreadByThreadId`/`NtWaitForAlertByThreadId`.
+Foreground boost and quantum changes, amd64 user hardware breakpoints and debug registers, XState contexts that match Windows, QPC in user mode, `NtSetInformationKey`, and `NtAlertThreadByThreadId` / `NtWaitForAlertByThreadId`.
 
 - `NtCreateThread` captures the CONTEXT and INITIAL_TEB once and checks them before the process handle.
-- A ready foreground thread behind a busy background thread of the same priority gets a decaying boost.
-- A terminating thread runs at low real-time priority, so `TerminateProcess` of an idle-class process under load completes promptly.
+- A ready foreground thread waiting behind a busy background thread of the same priority gets a boost that decays.
+- A terminating thread runs at low real-time priority, so `TerminateProcess` on an idle-priority process under load finishes promptly.
 
-<sub>Bug fixes in this area: 25 + 31</sub>
+<sub>Bug fixes in this area: 56</sub>
 
 ### WoW64 (32-bit programs on 64-bit)
 
-System call overhead drops from about 245 ns to about 92 ns: plain services skip FXSAVE, and APC dispatch and `Get/SetThreadContext` take the live x87/SSE state. Also: the 32-bit debug API, WOW64 TEB offset, thread context in 64-bit code, extended handle information, SCSI/ATA pass-through and a 336-entry pointer-free ioctl allow-list.
+System call overhead drops from about 245 ns to about 92 ns: plain system calls skip FXSAVE, and APC dispatch and `Get/SetThreadContext` read the live x87/SSE state instead. Also: the 32-bit debug API, the WOW64 TEB offset, thread context in 64-bit code, extended handle information, SCSI/ATA pass-through and an allow-list of 336 ioctls that carry no pointers.
 
-- The remaining SysWOW64 COM servers (DirectDraw, DirectSound, DirectInput, UI Automation, MSHTML, HTML Help, ADSI) are registered in the 32-bit view.
-- Crash reporter in SysWOW64, `ExitWindowsEx` and console control forwarding.
+- The remaining 32-bit COM servers (DirectDraw, DirectSound, DirectInput, UI Automation, MSHTML, HTML Help, ADSI) are registered in the 32-bit registry view.
+- The crash reporter runs in SysWOW64, and `ExitWindowsEx` and console control events are forwarded.
 
 <sub>Bug fixes in this area: 52</sub>
 
 ### NTFS and FAT
 
-NTFS-NG: journal commit without the core lock, POSIX delete, MFT record reuse, chkdsk/autochk, and non-cached writes sent to the device directly, up to 1 MB per request (AHCI sequential write 205 to 358 MB/s in our test). FAT: a checker synced to dosfstools 4.2.
+NTFS-NG commits its journal without holding the core lock, supports POSIX delete, reuses MFT records, runs chkdsk/autochk, and sends non-cached writes straight to the device in requests of up to 1 MB (AHCI sequential writes went from 205 to 358 MB/s in our test). The FAT checker is synced to dosfstools 4.2.
 
-- NTFS-NG only re-zeroes the page the old end of file sits in (growing a file by appends re-zeroed every page: 60-77 s).
+- NTFS-NG re-zeroes only the page that contains the old end of the file. Before, growing a file by appending re-zeroed every page (60 to 77 s in one test).
 - Byte-range locks belong to their file object: unlocking through one handle no longer releases locks taken through another.
-- fastfat: interlocked volume-state updates and a cleared create-in-progress flag after an exception (the next create bugchecked 0x23).
+- fastfat updates the volume state atomically and clears the create-in-progress flag after an exception; before, the next create could bugcheck with 0x23.
 
-<sub>Bug fixes in this area: 26 + 11</sub>
+<sub>Bug fixes in this area: 37</sub>
 
 ### Display, compositor and win32k
 
-Windows.UI.Composition stages 0 to 3 (visual tree) and a minimal DirectComposition: WebView2 controllers and Edge render, with Edge's default sandbox. DirectWrite font fallback, per-desktop win32k work, `UpdateLayeredWindow`.
+Windows.UI.Composition stages 0 to 3 (the visual tree) and a minimal DirectComposition, enough for WebView2 controllers and Edge to render, with Edge's default sandbox. DirectWrite font fallback, per-desktop win32k work and `UpdateLayeredWindow`.
 
-- `SetParent` works on another process' window as on Windows.
-- Window message behaviour closer to Windows 10, measured on a reference Windows install.
-- Pattern fills honour the DC brush origin in the 8/16/24/32 bpp blitters.
+- `SetParent` works on another process' window, as on Windows.
+- Window message behaviour is closer to Windows 10, measured on a reference Windows installation.
+- Pattern fills honour the DC brush origin in the 8, 16, 24 and 32 bpp blitters.
 
 <sub>Bug fixes in this area: 41</sub>
 
 ### Networking and firewall
 
-NitroOS Firewall on by default: inbound/outbound filter, rule store in the Windows registry format, firewall.cpl, wf.msc and a block prompt. TCP receive window and loopback, AFD send window and shutdown, `WSASendMsg`, `netsh portproxy`, HTTP Server API, schannel; ipconfig and net.exe output as on Windows.
+NitroOS Firewall is on by default: inbound and outbound filtering, a rule store in the Windows registry format, firewall.cpl, wf.msc and a block prompt. Fixes to the TCP receive window and loopback, the AFD send window and shutdown, `WSASendMsg`, `netsh portproxy`, the HTTP Server API and schannel; `ipconfig` and `net.exe` print what Windows prints.
 
-- `SO_RCVTIMEO` applies to datagram sockets (a UDP receive with a timeout waited forever).
-- Firewall: per-port address-file index (inbound owner lookup about 7x cheaper), address files pin their creator process.
+- `SO_RCVTIMEO` applies to datagram sockets too; a UDP receive with a timeout used to wait forever.
+- The firewall indexes address files by port (finding the owner of an inbound connection is about 7 times cheaper), and address files keep a reference to the process that created them.
 
 <sub>Bug fixes in this area: 48</sub>
 
@@ -181,55 +183,55 @@ NitroOS Firewall on by default: inbound/outbound filter, rule store in the Windo
 
 ConPTY and VT input: the pseudoconsole that VS Code, Windows Terminal and PowerShell 7 use.
 
-- Ctrl+C copies when text is selected, Ctrl+V pastes, Ctrl+A selects all; QuickEdit is on by default, as on Windows 10.
-- Console programs that own windows get `WM_QUERYENDSESSION`/`WM_ENDSESSION` at shutdown instead of being killed first.
+- Ctrl+C copies when text is selected, Ctrl+V pastes and Ctrl+A selects all; QuickEdit is on by default, as on Windows 10.
+- Console programs that own windows receive `WM_QUERYENDSESSION` and `WM_ENDSESSION` at shutdown instead of being killed first.
 
 <sub>Bug fixes in this area: 24</sub>
 
 ### Applications, COM and Wine 11.21
 
-Sync to Wine 11.21: 55 modules plus comctl32, mshtml, jscript, msxml3/4, urlmon, ieframe and msvcrt. PowerShell 7 preinstalled with clean-room NetAdapter, NetTCPIP, DnsClient, Storage, ScheduledTasks and LocalAccounts modules. Office Click-to-Run installs (Word itself still stops at its splash screen).
+Synced to Wine 11.21: 55 modules plus comctl32, mshtml, jscript, msxml3/4, urlmon, ieframe and msvcrt. PowerShell 7 is preinstalled with clean-room NetAdapter, NetTCPIP, DnsClient, Storage, ScheduledTasks and LocalAccounts modules. Office Click-to-Run installs; Word itself still stops at its splash screen.
 
-- msxml3 XPath parses prefixed function calls such as `ms:string-compare`.
-- DirectPlay8Create returns real objects (dplayx, dpnet synced).
+- msxml3 XPath understands prefixed function calls such as `ms:string-compare`.
+- `DirectPlay8Create` returns working objects (dplayx and dpnet synced).
 
-<sub>Bug fixes in this area: 66 + 91</sub>
+<sub>Bug fixes in this area: 157</sub>
 
 ### Locale data
 
-The 146 locale tables and the calendar data are generated from Unicode CLDR 49 by an in-tree, deterministic generator (`sdk/tools/nlsgen`). Nothing is taken from Windows.
+The 146 locale tables and the calendar data are generated from Unicode CLDR 49 by a deterministic generator in the source tree (`sdk/tools/nlsgen`). Nothing is taken from Windows.
 
 ### Setup, storage and drivers
 
-New installs go to `C:\Windows`, with a junction. The i386 live setup runs with DMA (about 1 minute to install in our test VM). NVMe storport miniport; Gecko, AAC and the GPU pack install on demand from Features.
+New installations go to `C:\Windows`, with a junction. The i386 live setup runs with DMA (about 1 minute to install in our test VM). New NVMe storport miniport. Gecko, AAC and the graphics pack install on demand from Features.
 
-- usbport: two CPUs flushing transfers at once no longer map one transfer twice (endless list walk).
-- i386 Debug installs work again (driver-install lock is a mutex; aligned `TOKEN_USER` buffers).
+- usbport: two CPUs flushing transfers at the same time no longer map one transfer twice (which caused an endless list walk).
+- i386 Debug installations work again (the driver-install lock is a mutex, and TOKEN_USER buffers are aligned).
 
-<sub>Bug fixes in this area: 9 + 20</sub>
+<sub>Bug fixes in this area: 29</sub>
 
 ### Security and build
 
-Registry security descriptors and eight grouped hardening sets (file-system links, loader and path handling, LSA, win32k USER, networking and others; details are held back until users have had time to update). The amd64 Release binaries are free of the SEH `__finally` code-generation defect (38 functions were affected, verified by a scan).
+Security descriptors on the registry and eight grouped sets of hardening fixes (file-system links, loader and path handling, LSA, win32k USER, networking and more; details are withheld until users have had time to update). The amd64 Release binaries are free of the SEH `__finally` code-generation defect (38 functions were affected; verified by a scan).
 
-<sub>Bug fixes in this area: 18 + 21</sub>
+<sub>Bug fixes in this area: 39</sub>
 
 ## Next release: 2026.11-2
 
-What we are working on now. Goals, not promises: the changelog of the release says what made it.
+What we are working on now. These are goals, not promises: the release notes will say what made it in.
 
-| Area | Goal | Status |
+| Area | Status | Goal |
 |---|---|---|
-| Faster | Close the gaps in our benchmark suite: file system, cached writes and process start. Directory listing is already about 15 times faster on main. Our goal for 2026.12-1 is to match or beat Windows 10 on the suite. | in progress |
-| Memory | Programs can commit up to RAM plus the paging file when the pager is on (in final testing). | in testing |
-| Locales | Date, number and currency formats closer to Windows, still generated from Unicode CLDR: 13 of 26 .NET culture lines now match Windows, up from 8. | on main |
-| Drivers and VMs | Interrupt connection for KMDF drivers, a log of every missing driver import, ObRegisterCallbacks, and a system volume that grows into a larger virtual disk at first boot. | on main |
-| Security | Two grouped hardening runs a day across the kernel, win32k and networking. | ongoing |
-| Office | Windows.UI.Composition work for Word, which still stops at its splash screen. | in progress |
+| Faster | in progress | Speed up the file system, cached writes and process start. Listing a large folder is already about 15 times faster in the development version. Our goal for 2026.12-1 is to match or beat Windows 10 across our benchmarks. |
+| Memory | in testing | When paging is on, programs will be able to use up to the size of RAM plus the paging file. This is in final testing. |
+| Locales | done | Date, number and currency formats closer to Windows, still built from Unicode's public data: 13 of the 26 lines in our .NET test now match Windows exactly, up from 8. |
+| Drivers and virtual machines | done | Better driver support (interrupts for KMDF drivers, a log of missing driver functions, process and thread callbacks), and the system disk grows automatically when you enlarge a virtual disk. |
+| Security | ongoing | Daily security hardening across the kernel, the graphics subsystem and networking. |
+| Office | in progress | Work on the Windows composition interfaces that Word needs. Today, Word still stops at its splash screen. |
 
 ## Download
 
-Release `2026.11-1` (amd64 with 32-bit support, and i386). The ISOs are hosted on repo.nitroos.org; check them against `SHA256SUMS`.
+Release `2026.11-1` comes in two versions: 64-bit (which also runs 32-bit programs) and 32-bit. The ISO files are hosted on repo.nitroos.org; check them against `SHA256SUMS`.
 
 | File | Size | SHA-256 |
 |---|---|---|
@@ -237,13 +239,13 @@ Release `2026.11-1` (amd64 with 32-bit support, and i386). The ISOs are hosted o
 | [reactos-nitro-2026.11-1-i386-Release.iso](https://repo.nitroos.org/releases/nitro-2026.11-1/reactos-nitro-2026.11-1-i386-Release.iso) | 472,907,776 bytes | `ddfb5a43768d44b5c45ae7c588252afc7e587db0ba9cce01b452d0defef4011e` |
 | [SHA256SUMS](https://repo.nitroos.org/releases/nitro-2026.11-1/SHA256SUMS) | | |
 
-The source tarball and one cumulative patch over the upstream base are attached to the [GitHub release](https://github.com/nitroos-org/releases/releases/tag/nitro-2026.11-1) (`reactos-nitro-2026.11-1-src.tar.gz`, `nitro-2026.11-1-over-e46f4bb1a1e.cumulative.patch`). Older releases: [`repo.nitroos.org/releases/`](https://repo.nitroos.org/releases/).
+The source code and a single patch against the ReactOS base are attached to the [GitHub release](https://github.com/nitroos-org/releases/releases/tag/nitro-2026.11-1) (`reactos-nitro-2026.11-1-src.tar.gz`, `nitro-2026.11-1-over-e46f4bb1a1e.cumulative.patch`). Older releases: [`repo.nitroos.org/releases/`](https://repo.nitroos.org/releases/).
 
-Use the **amd64** ISO unless you need a 32-bit system: every NitroOS screenshot on this page is from an amd64 build.
+Choose the 64-bit ISO unless you need a 32-bit system; all screenshots on this page are from the 64-bit version.
 
 ## Quick start
 
-1. Create a VM. Tested configuration: QEMU/KVM, machine `pc` (i440fx), SeaBIOS, 2 to 4 vCPUs, 2 to 4 GB RAM, an IDE disk of 8 GB or more, an `e1000` network card, standard VGA. Other hypervisors and real hardware are untested.
+1. Create a virtual machine. We tested with QEMU/KVM: machine `pc` (i440fx), SeaBIOS, 2 to 4 virtual CPUs, 2 to 4 GB of memory, an IDE disk of 8 GB or more, an `e1000` network card and standard VGA. Other hypervisors and real hardware are untested.
 
    ```sh
    qemu-img create -f raw nitroos.img 20G
@@ -254,56 +256,52 @@ Use the **amd64** ISO unless you need a 32-bit system: every NitroOS screenshot 
      -device VGA -usb -device usb-tablet
    ```
 
-2. Boot the ISO, click **Install**, accept the defaults (NTFS is preselected). Setup restarts into its second stage, then to the desktop. The installer text may still say "ReactOS" in places (see limitations).
-3. First boot: cancel the "Other ACPI device" wizard. A *Choose Your Web Browser* window offers to install Firefox (it downloads it through the Features manager).
-4. For more resolution, use right-click on the desktop, Properties, Settings. The list offered 800x600, 1024x600, 1024x768, 1152x864 and more in our VM.
-5. **Features** (Run: `optfeatures`) installs PowerShell 7, Scoop (then `scoop install git` and `scoop bucket add extras`, then e.g. `scoop install vscode googlechrome`), .NET Framework 4.8, Wine Gecko, the AAC decoder and more.
+2. Boot from the ISO, click **Install** and accept the defaults (NTFS is already selected). Setup restarts once to finish, then starts the desktop. Some installer text may still say "ReactOS" (see the known limitations).
+3. On first boot, cancel the "Other ACPI device" wizard. A *Choose Your Web Browser* window offers to install Firefox, which it downloads through Features.
+4. To change the screen resolution, right-click the desktop and choose **Properties**, then **Settings**. In our VM the list offered 800x600, 1024x600, 1024x768, 1152x864 and more.
+5. **Features** (Run: `optfeatures`) installs PowerShell 7, Scoop, .NET Framework 4.8, Wine Gecko, the AAC decoder and more. With Scoop you can then install other software, for example `scoop install git`, `scoop bucket add extras` and `scoop install vscode googlechrome`.
 
 ## Known limitations
 
-From the 2026.11-1 release notes, and from what we saw while taking the screenshots above:
+From the 2026.11-1 release notes and our own testing:
 
-- **Alpha quality.** Tested under QEMU/KVM only; real-hardware paths, notably the APIC HAL, are not covered.
-- **The ReactOS name still appears in places.** We did not audit every dialog and installer page.
-- **Memory pager:** on by default on amd64, off on i386 (`NitroPager=0` turns it off on amd64). In a 1 GB VM a process can commit about 768 MB: a 1400 MB allocation fails cleanly with `ERROR_COMMITMENT_LIMIT`, and `7z b` stops at dictionary 25. A 1400 MB hog plus a `git clone` at the same moment still fails in 4 of 9 runs on a 1 GB VM.
-- **File system speed:** NTFS directory enumeration is slow (20 passes over 10,000 files: 2.19 s on amd64; the same kernel on FAT: 44 ms), and so is reading many small files (2.38 s per 10,000 on NTFS). Cached sequential write: 45 MB/s on amd64.
-- **Multi-threaded heap contention is slow:** 4 threads x 250,000 alloc/free take 6.8 s on amd64 and 12.2 s on i386.
-- **Word** (Office Click-to-Run) installs but stops at its splash screen.
-- **VS Code's integrated terminal** renders corrupted with its default WebGL renderer in about 16 of 18 launches. Workaround: set `terminal.integrated.gpuAcceleration` to `off`, or start VS Code with `--use-angle=swiftshader --enable-unsafe-swiftshader`.
-- **UIPI is missing:** no window-message isolation between integrity levels. Do not expose a NitroOS machine to untrusted local users.
-- **FAT:** a bugcheck 0x23 in about 2% of runs under heavy load.
-- **USB hot-plug:** a rare guest hang (fixed on main after this release).
-- **i386 Setup is slow in QEMU:** about 26 minutes in our test VM; the amd64 ISO installs in about 70 seconds.
-- WoW64 (running 32-bit programs) is amd64 only.
-- Everything in upstream ReactOS's own list of known issues also applies.
+- NitroOS is alpha software and has been tested only in QEMU/KVM virtual machines. Real hardware is untested; in particular, the interrupt handling for real multi-processor machines (the APIC HAL) is not covered.
+- The ReactOS name still appears in some places; we have not checked every dialog and installer page.
+- In a 1 GB virtual machine, one program can use about 768 MB of memory; a 1,400 MB allocation fails cleanly. Running a 1,400 MB program and a `git clone` at the same time still fails in 4 of 9 tries.
+- NTFS is slow with large folders and many small files: 20 listings of a 10,000-file folder take 2.19 s on 64-bit, and reading 10,000 small files takes 2.38 s. Cached sequential writes reach 45 MB/s. All three are being worked on for 2026.11-2.
+- Word installs but stops at its splash screen.
+- The VS Code terminal draws garbled text with its default GPU renderer in most launches. Workaround: set `terminal.integrated.gpuAcceleration` to `off`.
+- User Interface Privilege Isolation (UIPI) is missing, so windows at different integrity levels can send each other messages. Do not let untrusted people log on to a NitroOS machine.
+- Running 32-bit programs is supported on the 64-bit version only.
+- Everything in ReactOS's own list of known issues also applies.
 
 ## Build from source
 
-Every release is tagged in the development fork: [`nitro-2026.11-1`](https://github.com/nitroos-org/reactos/releases/tag/nitro-2026.11-1) in [nitroos-org/reactos](https://github.com/nitroos-org/reactos). The source tarball and the cumulative patch (apply to upstream `e46f4bb1a1e` with `git apply --binary`; the result is byte-identical to the tag) are attached to the release. Build as you would upstream ReactOS, with the ReactOS Build Environment (RosBE). The amd64 build with 32-bit support needs `-DBUILD_WOW64_ENABLED=ON -DSYSWOW64=ON`; an amd64 Release build without `SYSWOW64` hangs the unattended install.
+Every release is tagged in the development repository: [`nitro-2026.11-1`](https://github.com/nitroos-org/reactos/releases/tag/nitro-2026.11-1) in [nitroos-org/reactos](https://github.com/nitroos-org/reactos). The source tarball and the cumulative patch are attached to the release; applying the patch to upstream `e46f4bb1a1e` with `git apply --binary` gives exactly the tagged tree. Build it as you would build ReactOS, with the ReactOS Build Environment (RosBE). For the 64-bit version that runs 32-bit programs, add `-DBUILD_WOW64_ENABLED=ON -DSYSWOW64=ON`; a 64-bit Release build without `SYSWOW64` hangs during unattended installation.
 
 ## Relationship to ReactOS
 
-NitroOS is built on [ReactOS](https://reactos.org): the kernel, the Win32 subsystem and most of the user mode come from the ReactOS project and its contributors, and we merge upstream ReactOS master regularly (this release has no upstream sync; its base is `e46f4bb1a1e` from 2026-10-25). See [UPSTREAM.md](UPSTREAM.md) for what we change and why our NTFS is a separate driver. NitroOS is **not** the ReactOS project, is not supported by it, and its bugs belong in this repository's issues. The name "ReactOS" is a trademark of the ReactOS project; "Windows" and the names of other products in screenshots belong to their owners and are used only to say what a program is compatible with.
+NitroOS is built on [ReactOS](https://reactos.org): the kernel, the Win32 subsystem and most of the user mode come from the ReactOS project and its contributors, and we merge the latest ReactOS code regularly (this release did not include a new merge; it is based on `e46f4bb1a1e` from 25 October 2026). [UPSTREAM.md](UPSTREAM.md) explains what we change and why NitroOS has its own NTFS driver. NitroOS is not the ReactOS project and is not supported by it; please report NitroOS bugs in this repository. "ReactOS" is a trademark of the ReactOS project. "Windows" and the other product names in screenshots belong to their owners and are used only to show what NitroOS is compatible with.
 
 ## Licence
 
-NitroOS is distributed under the same licences as ReactOS: mainly GPL-2.0-or-later, with per-file licences kept as they are in the source; upstream copyright notices are kept intact. The test program `docs/demo/app.cs` is original and dedicated to the public domain (CC0). The logo files under `docs/img/brand/` are NitroOS artwork.
+NitroOS uses the same licences as ReactOS, mainly GPL-2.0-or-later. Each file keeps its own licence and copyright notices. The test program `docs/demo/app.cs` is our own and is released into the public domain (CC0). The logo files in `docs/img/brand/` are NitroOS artwork.
 
 ## Credits
 
-NitroOS stands on the work of many open-source projects. Thank you to:
+NitroOS stands on the work of many open-source projects. Thank you.
 
-- **[ReactOS](https://reactos.org)**: the ReactOS project and its contributors. NitroOS is built on their kernel, Win32 subsystem and most of the user mode, and we merge upstream ReactOS regularly.
-- **[Wine](https://www.winehq.org)**: the Wine project, whose DLLs ReactOS and NitroOS reuse (synced to Wine 11.21 in this release).
-- **[Linux fs/ntfs](https://www.kernel.org)**: the authors of the Linux kernel's NTFS driver, the core of NitroOS's NTFS driver.
+- **[ReactOS](https://reactos.org)**: the ReactOS project and its contributors. NitroOS is built on their kernel, Win32 subsystem and most of the user mode, and we merge their latest changes regularly.
+- **[Wine](https://www.winehq.org)**: whose libraries ReactOS and NitroOS reuse (updated to Wine 11.21 in this release).
+- **[Linux NTFS driver](https://www.kernel.org)**: its authors; it is the core of NitroOS's NTFS support.
 - **[WinBtrfs](https://github.com/maharmstone/btrfs)**: Mark Harmstone's Btrfs driver and tools.
-- **[Unicode CLDR and ICU](https://cldr.unicode.org)**: the Unicode Consortium's locale data, which the locale tables are generated from, and ICU 64.2.
-- **[Mesa, LLVM and the Vulkan loader](https://www.mesa3d.org)**: Mesa3D (llvmpipe, lavapipe), LLVM and the Khronos Vulkan loader: software OpenGL and Vulkan in the GPU pack.
-- **[FFmpeg](https://ffmpeg.org)**: the AAC audio decoder add-ons.
-- **[WinFsp](https://winfsp.dev)**: Bill Zissimopoulos's framework for user-mode file systems, available as an optional feature.
-- **[dosfstools](https://github.com/dosfstools/dosfstools)**: the FAT checker.
-- **[PowerShell and Scoop](https://github.com/PowerShell/PowerShell)**: PowerShell 7 (preinstalled from the official package) and Scoop (an optional feature).
+- **[Unicode CLDR and ICU](https://cldr.unicode.org)**: the Unicode Consortium's locale data, from which our locale tables are generated, and ICU 64.2.
+- **[Mesa, LLVM and the Vulkan loader](https://www.mesa3d.org)**: software OpenGL and Vulkan in the optional graphics pack.
+- **[FFmpeg](https://ffmpeg.org)**: the optional AAC audio decoders.
+- **[WinFsp](https://winfsp.dev)**: Bill Zissimopoulos's framework for file systems that run as ordinary programs (an optional feature).
+- **[dosfstools](https://github.com/dosfstools/dosfstools)**: the FAT disk checker.
+- **[PowerShell and Scoop](https://github.com/PowerShell/PowerShell)**: PowerShell 7, preinstalled from Microsoft's official package, and the Scoop package manager (an optional feature).
 - **[mingw-w64](https://www.mingw-w64.org)**: public headers, one of our clean sources for interface definitions.
 - **[Fonts](https://fonts.google.com/noto)**: Selawik, Carlito, Caladea, Noto Sans CJK, Noto Sans Symbols 2 and Noto Emoji, under the SIL Open Font License.
 
-The full list with versions and licences is in [`media/doc/3rd Party Files.txt`](https://github.com/nitroos-org/reactos/blob/main/media/doc/3rd%20Party%20Files.txt).
+NitroOS uses the same licences as ReactOS, mainly GPL-2.0-or-later. Every file keeps its own licence and copyright notices, and the third-party licence texts are on the installation CD. The full list, with versions and licences, is in [`media/doc/3rd Party Files.txt`](https://github.com/nitroos-org/reactos/blob/main/media/doc/3rd%20Party%20Files.txt).
