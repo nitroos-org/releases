@@ -68,3 +68,5 @@ h3.grouphead{color:var(--sky);font-size:15px;text-transform:uppercase;letter-spa
 .card code,.tech code{overflow-wrap:anywhere}
 html,body{overflow-x:hidden}
 @media(max-width:860px){header.top img{height:36px}.navbtn{display:block}header.top nav{display:none;width:100%;flex-direction:column;padding:6px 0 4px}header.top nav a{margin:0;padding:11px 4px;border-top:1px solid var(--harbor);font-size:17px}.navtoggle:checked~nav{display:flex}.hero{padding-top:32px}.hero h1{font-size:28px}table.perf td.res{min-width:0}table.perf td.res .bar{display:none}}
+
+ul.credits{columns:2 380px;column-gap:32px;padding-left:20px}ul.credits li{break-inside:avoid;margin:0 0 10px;font-size:15px}

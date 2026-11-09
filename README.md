@@ -14,6 +14,7 @@ NitroOS is built on ReactOS, with major enhancements: current 64-bit and 32-bit 
   <a href="#quick-start">Quick start</a> ·
   <a href="#technical-details">Technical details</a> ·
   <a href="#known-limitations">Known limitations</a> ·
+  <a href="#credits">Credits</a> ·
   <a href="CHANGELOG.md">Changelog</a> ·
   <a href="BENCHMARKS.md">Benchmarks</a>
 </p>
@@ -261,8 +262,25 @@ Every release is tagged in the development fork: [`nitro-2026.11-1`](https://git
 
 NitroOS is built on [ReactOS](https://reactos.org): the kernel, the Win32 subsystem and most of the user mode come from the ReactOS project and its contributors, and we merge upstream ReactOS master regularly (this release has no upstream sync; its base is `e46f4bb1a1e` from 2026-10-25). See [UPSTREAM.md](UPSTREAM.md) for what we change and why our NTFS is a separate driver. NitroOS is **not** the ReactOS project, is not supported by it, and its bugs belong in this repository's issues. The name "ReactOS" is a trademark of the ReactOS project; "Windows" and the names of other products in screenshots belong to their owners and are used only to say what a program is compatible with.
 
-## Licence and credits
+## Licence
 
 NitroOS is distributed under the same licences as ReactOS: mainly GPL-2.0-or-later, with per-file licences kept as they are in the source; upstream copyright notices are kept intact. The test program `docs/demo/app.cs` is original and dedicated to the public domain (CC0). The logo files under `docs/img/brand/` are NitroOS artwork.
 
-Credit goes to the [ReactOS project](https://reactos.org) and its contributors; the authors of the Linux kernel's `fs/ntfs` driver; [WinBtrfs](https://github.com/maharmstone/btrfs) by Mark Harmstone; the [Wine project](https://www.winehq.org), whose code ReactOS and this patch set reuse; and FFmpeg for the AAC decoder add-on.
+## Credits
+
+NitroOS stands on the work of many open-source projects. Thank you to:
+
+- **[ReactOS](https://reactos.org)**: the ReactOS project and its contributors. NitroOS is built on their kernel, Win32 subsystem and most of the user mode, and we merge upstream ReactOS regularly.
+- **[Wine](https://www.winehq.org)**: the Wine project, whose DLLs ReactOS and NitroOS reuse (synced to Wine 11.21 in this release).
+- **[Linux fs/ntfs](https://www.kernel.org)**: the authors of the Linux kernel's NTFS driver, the core of NitroOS's NTFS driver.
+- **[WinBtrfs](https://github.com/maharmstone/btrfs)**: Mark Harmstone's Btrfs driver and tools.
+- **[Unicode CLDR and ICU](https://cldr.unicode.org)**: the Unicode Consortium's locale data, which the locale tables are generated from, and ICU 64.2.
+- **[Mesa, LLVM and the Vulkan loader](https://www.mesa3d.org)**: Mesa3D (llvmpipe, lavapipe), LLVM and the Khronos Vulkan loader: software OpenGL and Vulkan in the GPU pack.
+- **[FFmpeg](https://ffmpeg.org)**: the AAC audio decoder add-ons.
+- **[WinFsp](https://winfsp.dev)**: Bill Zissimopoulos's framework for user-mode file systems, available as an optional feature.
+- **[dosfstools](https://github.com/dosfstools/dosfstools)**: the FAT checker.
+- **[PowerShell and Scoop](https://github.com/PowerShell/PowerShell)**: PowerShell 7 (preinstalled from the official package) and Scoop (an optional feature).
+- **[mingw-w64](https://www.mingw-w64.org)**: public headers, one of our clean sources for interface definitions.
+- **[Fonts](https://fonts.google.com/noto)**: Selawik, Carlito, Caladea, Noto Sans CJK, Noto Sans Symbols 2 and Noto Emoji, under the SIL Open Font License.
+
+The full list with versions and licences is in [`media/doc/3rd Party Files.txt`](https://github.com/nitroos-org/reactos/blob/main/media/doc/3rd%20Party%20Files.txt).
