@@ -21,7 +21,7 @@ NitroOS is built on ReactOS, with major enhancements: current 64-bit and 32-bit 
 
 <p align="center"><a href="docs/img/hero.webp"><img alt="NitroOS 2026.11-1 running Chrome, Visual Studio Code and the Features dialog" src="docs/img/hero.webp"></a></p>
 
-> **NitroOS is an unofficial build based on [ReactOS](https://reactos.org). It is not affiliated with or endorsed by the ReactOS project.** ReactOS is a trademark of the ReactOS project. **Do not report problems from this build to the ReactOS project; report them here.**
+> **NitroOS is based on [ReactOS](https://reactos.org). It is not affiliated with or endorsed by the ReactOS project.** ReactOS is a trademark of the ReactOS project. **Do not report problems from this build to the ReactOS project; report them here.**
 >
 > Like ReactOS itself, this is alpha-quality software. Use it in a virtual machine, not on a disk holding data you care about. It was tested under QEMU/KVM only.
 
