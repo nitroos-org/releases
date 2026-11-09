@@ -227,7 +227,7 @@ What we are working on now. These are goals, not promises: the release notes wil
 | Memory | done | When paging is on, programs can use up to the size of RAM plus the paging file, so a 1 GB machine runs a 1.4 GB program next to a git clone. |
 | Locales | done | Date, number and currency formats closer to Windows, still built from Unicode's public data: 13 of the 26 lines in our .NET test now match Windows exactly, up from 8. |
 | Drivers and virtual machines | done | Better driver support (interrupts for KMDF drivers, a log of missing driver functions, process and thread callbacks), and the system disk grows automatically when you enlarge a virtual disk. |
-| Security | ongoing | Daily security hardening across the kernel, the graphics subsystem and networking. |
+| Security | daily | Security fixes across the kernel, the graphics subsystem and networking, every day. |
 | Office | in progress | Work on the Windows composition interfaces that Word needs. Today, Word still stops at its splash screen. |
 
 ## Download
