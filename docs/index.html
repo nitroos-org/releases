@@ -5,7 +5,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="img/brand/favicon-32.png"><link rel="icon" type="image/png" sizes="16x16" href="img/brand/favicon-16.png">
 <link rel="stylesheet" href="style.css"></head><body>
 <header class="top"><div class="wrap"><a href="#"><img src="img/brand/lockup-640.png" alt="NitroOS"></a>
-<nav><a href="#why">Enhancements</a><a href="#screenshots">Screenshots</a><a href="#numbers">Numbers</a><a href="#download">Download</a><a href="#limits">Limitations</a><a href="https://github.com/nitroos-org">GitHub</a></nav></div></header>
+<nav><a href="#why">Enhancements</a><a href="#screenshots">Screenshots</a><a href="#numbers">Speed</a><a href="#download">Download</a><a href="#limits">Limitations</a><a href="https://github.com/nitroos-org">GitHub</a></nav></div></header>
 <div class="hero"><div class="wrap">
 <h1>An open-source, Windows-compatible operating system, built on ReactOS</h1>
 <p class="lead">That is our aim. NitroOS takes <a href="https://reactos.org">ReactOS</a> and adds major enhancements: current 64-bit and 32-bit apps side by side, .NET Framework 4.8, PowerShell 7, NTFS by default and a firewall that is on. Release 2026.11-1.</p>
@@ -39,19 +39,24 @@
 <figure><a href="img/nitro-install.webp"><img loading="lazy" src="img/nitro-install.webp" alt="Setup summary: multiprocessor kernel, installs to \Windows (NitroOS)"></a><figcaption>Setup summary: multiprocessor kernel, installs to <code>\Windows</code></figcaption></figure>
 <figure><a href="img/nitro-firewall.webp"><img loading="lazy" src="img/nitro-firewall.webp" alt="NitroOS Firewall, on after a fresh install (NitroOS)"></a><figcaption>NitroOS Firewall, on after a fresh install</figcaption></figure>
 </div></div></section>
-<section id="numbers"><div class="wrap"><h2>Measured: NitroOS vs stock ReactOS</h2><p class="sub">2026-11-08, one host (AMD EPYC 9254, QEMU/KVM), 4 vCPU, 4 GB, median of 5 runs, 32-bit builds of both, both on FAT. Stock ReactOS is upstream master <code>4d1f0148bed</code>. Method and raw data: <a href="https://github.com/nitroos-org/releases/blob/main/BENCHMARKS.md">BENCHMARKS.md</a>.</p>
-<div class="tablewrap"><table><tr><th>Test</th><th class="n">Stock ReactOS</th><th class="n">NitroOS</th><th class="n">Factor</th></tr>
-<tr><td>Demand-zero page faults (kpages/s)</td><td class="n">8.5</td><td class="n">1142</td><td class="n">134x</td></tr>
-<tr><td>Copy-on-write page faults (kpages/s)</td><td class="n">6.7</td><td class="n">447</td><td class="n">66x</td></tr>
-<tr><td>File-mapped page faults (kpages/s)</td><td class="n">42.9</td><td class="n">1115</td><td class="n">26x</td></tr>
-<tr><td>HeapAlloc/HeapFree, 1M ops (ms)</td><td class="n">1600</td><td class="n">151</td><td class="n">10.6x</td></tr>
-<tr><td>VirtualAlloc commit/decommit, 32768 (ms)</td><td class="n">69.4</td><td class="n">13.4</td><td class="n">5.2x</td></tr>
-<tr><td>7-Zip benchmark total (MIPS) †</td><td class="n">3444</td><td class="n">22640</td><td class="n">6.6x</td></tr>
-<tr><td>cmd.exe /c exit, 50 starts (ms) †</td><td class="n">596.6</td><td class="n">285.9</td><td class="n">2.1x</td></tr>
-<tr><td>Process create + wait, 200 (ms) †</td><td class="n">1686</td><td class="n">584.3</td><td class="n">2.9x</td></tr>
-<tr><td>Boot to logon (s)</td><td class="n">10</td><td class="n">6</td><td class="n">1.7x</td></tr></table>
-<p class="note">† Multi-core work: stock ReactOS i386 runs a uniprocessor kernel by default, NitroOS uses all 4 vCPUs, so these rows partly reflect that difference. The other rows are single-threaded.</p></div>
-<p>Where stock ReactOS is ahead (it is a single-CPU kernel): 4-thread heap test 450 ms vs 12,180 ms (27x), event ping-pong 51 ms vs 583 ms (11x), 10,000 small-file reads on FAT 95 ms vs 183 ms (1.9x).</p></div></section>
+<section id="numbers"><div class="wrap"><h2>Speed</h2><p class="sub">NitroOS compared with the upstream ReactOS code it is built on. Same test program, same virtual machine, 32-bit builds of both. Each result says how much faster or slower NitroOS is.</p>
+<div class="tablewrap"><table class="perf"><tr><th>Test</th><th class="n">ReactOS</th><th class="n">NitroOS</th><th>NitroOS is</th></tr>
+<tr class="grp"><td colspan="4">Memory</td></tr>
+<tr><td>New memory pages (demand-zero page faults), pages per second</td><td class="n">8,500</td><td class="n">1,142,000</td><td class="res up"><span class="bar" style="width:100%"></span>134× faster</td></tr>
+<tr><td>Copy-on-write page faults, pages per second</td><td class="n">6,700</td><td class="n">447,000</td><td class="res up"><span class="bar" style="width:86%"></span>66× faster</td></tr>
+<tr><td>File-mapped page faults, pages per second</td><td class="n">42,900</td><td class="n">1,115,000</td><td class="res up"><span class="bar" style="width:67%"></span>26× faster</td></tr>
+<tr><td>Heap: 1 million allocate + free</td><td class="n">1.60 s</td><td class="n">0.15 s</td><td class="res up"><span class="bar" style="width:48%"></span>10.6× faster</td></tr>
+<tr><td>VirtualAlloc: 32,768 commit + decommit</td><td class="n">69 ms</td><td class="n">13 ms</td><td class="res up"><span class="bar" style="width:34%"></span>5.2× faster</td></tr>
+<tr><td>Heap: 4 threads at once</td><td class="n">0.45 s</td><td class="n">12.2 s</td><td class="res down"><span class="bar" style="width:67%"></span>27× slower</td></tr>
+<tr class="grp"><td colspan="4">Programs</td></tr>
+<tr><td>Boot to logon screen</td><td class="n">10 s</td><td class="n">6 s</td><td class="res up"><span class="bar" style="width:11%"></span>1.7× faster</td></tr>
+<tr><td>Start <code>cmd.exe</code> 50 times †</td><td class="n">0.60 s</td><td class="n">0.29 s</td><td class="res up"><span class="bar" style="width:15%"></span>2.1× faster</td></tr>
+<tr><td>Create and wait for 200 processes †</td><td class="n">1.69 s</td><td class="n">0.58 s</td><td class="res up"><span class="bar" style="width:22%"></span>2.9× faster</td></tr>
+<tr><td>7-Zip built-in benchmark (MIPS, higher is better) †</td><td class="n">3,444</td><td class="n">22,640</td><td class="res up"><span class="bar" style="width:39%"></span>6.6× faster</td></tr>
+<tr><td>Two threads signalling each other (event ping-pong)</td><td class="n">51 ms</td><td class="n">583 ms</td><td class="res down"><span class="bar" style="width:49%"></span>11× slower</td></tr>
+<tr class="grp"><td colspan="4">Files</td></tr>
+<tr><td>Read 10,000 small files (FAT)</td><td class="n">95 ms</td><td class="n">183 ms</td><td class="res down"><span class="bar" style="width:13%"></span>1.9× slower</td></tr></table>
+<p class="note">† Uses several CPUs: the 32-bit ReactOS build runs a single-CPU kernel by default, NitroOS uses all 4, so part of that gain comes from the extra CPUs. The slower rows are lock-contention and small-file tests; they are being worked on for 2026.11-2.</p><p class="note">Method: 2026-11-08, one host (AMD EPYC 9254, QEMU/KVM), 4 vCPU, 4 GB, median of 5 runs, both systems on FAT. ReactOS: upstream master <code>4d1f0148bed</code>. Raw data: <a href="https://github.com/nitroos-org/releases/blob/main/BENCHMARKS.md">BENCHMARKS.md</a>.</p></div></div></section>
 <section id="download"><div class="wrap"><h2>Download</h2><p class="sub">Release 2026.11-1, 2026-11-08. Hosted on repo.nitroos.org; check against SHA256SUMS.</p>
 <div class="tablewrap"><table><tr><th>File</th><th class="n">Size (bytes)</th><th>SHA-256</th></tr>
 <tr><td><a href="https://repo.nitroos.org/releases/nitro-2026.11-1/reactos-nitro-2026.11-1-amd64-wow64-Release.iso">amd64 with 32-bit support</a></td><td class="n">800,063,488</td><td><code>1f12edc4e134299f7f4341f64f7d171872b88f00bfaed03399b2103524d7f14f</code></td></tr>

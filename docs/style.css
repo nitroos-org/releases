@@ -49,3 +49,10 @@ ul.tight{padding-left:20px}ul.tight li{margin:4px 0}
 .gallery figcaption{font-size:14px;color:#aab0d8;margin-top:6px}
 .hero a img.shot{cursor:zoom-in}
 @media(max-width:760px){.gallery{grid-template-columns:1fr}}
+
+table.perf tr.grp td{color:var(--glow);font-weight:600;padding-top:18px;border-bottom:1px solid var(--violet)}
+table.perf td.res{white-space:nowrap;font-weight:600;min-width:170px}
+table.perf td.res .bar{display:inline-block;height:10px;max-width:70px;border-radius:3px;margin-right:8px;vertical-align:middle}
+table.perf td.res.up{color:var(--sky)}table.perf td.res.up .bar{background:var(--sky)}
+table.perf td.res.down{color:var(--lamp)}table.perf td.res.down .bar{background:var(--lamp)}
+p.note{font-size:14px;color:#aab0d8}

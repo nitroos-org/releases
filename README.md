@@ -41,25 +41,33 @@ What NitroOS adds on top of ReactOS. Each point links to a screenshot or a measu
 | **NTFS by default.** Setup offers NTFS and preselects it. | [Setup, format step](#screenshots) |
 | **A firewall that is on.** NitroOS Firewall reports state "On" for the private network after a fresh install. | [Firewall](#screenshots) |
 | **Features on demand.** A Features dialog turns on PowerShell 7, Scoop, .NET Framework 4.8, Firefox, the AAC audio decoder and more, and downloads them when ticked. | [Features](#screenshots) |
-| **Faster memory paths** than the ReactOS code it builds on (measured on 32-bit builds of both): see [the numbers](#measured-nitroos-vs-stock-reactos). | table below |
+| **Faster memory paths** than the ReactOS code it builds on (measured on 32-bit builds of both): see [the numbers](#speed). | table below |
 
-### Measured: NitroOS vs stock ReactOS
+### Speed
 
-Lane `bench4`, 2026-11-08, one host (AMD EPYC 9254, QEMU 8.2 with KVM), 4 vCPU, 4 GB, medians of 5 runs, same benchmark program (written for the test, in [`BENCHMARKS.md`](BENCHMARKS.md)) built as 32-bit. Both systems on FAT (stock ReactOS Setup offers FAT), so the file system does not distort the comparison. **Stock ReactOS i386 runs a uniprocessor kernel by default while NitroOS uses all 4 vCPUs:** rows marked † measure multi-core work and partly reflect that difference; the other rows are single-threaded. NitroOS i386 from main `a690f0ba892`; stock ReactOS from upstream master `4d1f0148bed`, built the same way. Higher factor = NitroOS better.
+NitroOS compared with the upstream ReactOS code it is built on: same test program, same virtual machine, 32-bit builds of both. Each result says how much faster or slower NitroOS is.
 
-| Test | Stock ReactOS | NitroOS | Factor |
-|---|---|---|---|
-| Demand-zero page faults (kpages/s) | 8.5 | 1142 | **134x** |
-| Copy-on-write page faults (kpages/s) | 6.7 | 447 | **66x** |
-| File-mapped page faults (kpages/s) | 42.9 | 1115 | **26x** |
-| `HeapAlloc`/`HeapFree`, 1M operations (ms) | 1600 | 151 | **10.6x** |
-| `VirtualAlloc` commit/decommit, 32768 (ms) | 69.4 | 13.4 | **5.2x** |
-| 7-Zip benchmark total (MIPS) † | 3444 | 22640 | 6.6x † |
-| `cmd.exe /c exit`, 50 starts (ms) † | 596.6 | 285.9 | 2.1x † |
-| Process create + wait, 200 (ms) † | 1686 | 584.3 | 2.9x † |
-| Boot to logon, 3 boots (s) | 10 | 6 | 1.7x |
+| Test | ReactOS | NitroOS | NitroOS is |
+|---|--:|--:|---|
+| **Memory** | | | |
+| New memory pages (demand-zero page faults), pages per second | 8,500 | 1,142,000 | 🟢 **134× faster** |
+| Copy-on-write page faults, pages per second | 6,700 | 447,000 | 🟢 **66× faster** |
+| File-mapped page faults, pages per second | 42,900 | 1,115,000 | 🟢 **26× faster** |
+| Heap: 1 million allocate + free | 1.60 s | 0.15 s | 🟢 **10.6× faster** |
+| VirtualAlloc: 32,768 commit + decommit | 69 ms | 13 ms | 🟢 **5.2× faster** |
+| Heap: 4 threads at once | 0.45 s | 12.2 s | 🟠 **27× slower** |
+| **Programs** | | | |
+| Boot to logon screen | 10 s | 6 s | 🟢 **1.7× faster** |
+| Start `cmd.exe` 50 times † | 0.60 s | 0.29 s | 🟢 **2.1× faster** |
+| Create and wait for 200 processes † | 1.69 s | 0.58 s | 🟢 **2.9× faster** |
+| 7-Zip built-in benchmark (MIPS, higher is better) † | 3,444 | 22,640 | 🟢 **6.6× faster** |
+| Two threads signalling each other (event ping-pong) | 51 ms | 583 ms | 🟠 **11× slower** |
+| **Files** | | | |
+| Read 10,000 small files (FAT) | 95 ms | 183 ms | 🟠 **1.9× slower** |
 
-Where stock ReactOS is ahead, from the same run: stock ReactOS is a **single-CPU** kernel, which helps it on lock-contention tests. A 4-thread heap test takes 450 ms on stock and 12,180 ms on NitroOS i386 (stock is 27x better); event ping-pong between two threads takes 51 ms on stock and 583 ms on NitroOS (11x better); reading 10,000 small files on FAT takes 95 ms on stock and 183 ms on NitroOS (1.9x better). Details, per-run spread, the 1 GB memory-pressure set and the method are in `BENCHMARKS.md` and the full study.
+† Uses several CPUs: the 32-bit ReactOS build runs a single-CPU kernel by default, NitroOS uses all 4, so part of that gain comes from the extra CPUs. The slower rows are lock-contention and small-file tests; they are being worked on for 2026.11-2.
+
+Method: lane `bench4`, 2026-11-08, one host (AMD EPYC 9254, QEMU 8.2 with KVM), 4 vCPU, 4 GB, medians of 5 runs, both systems on FAT. NitroOS i386 from main `a690f0ba892`, ReactOS from upstream master `4d1f0148bed`, built the same way. Per-run spread, the 1 GB memory-pressure set and the method: [`BENCHMARKS.md`](BENCHMARKS.md).
 
 ## Screenshots
 
