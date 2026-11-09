@@ -6,14 +6,23 @@
 <link rel="stylesheet" href="style.css"></head><body>
 <header class="top"><div class="wrap"><a href="#"><img src="img/brand/lockup-640.png" alt="NitroOS"></a>
 <input type="checkbox" id="navtoggle" class="navtoggle" aria-hidden="true"><label for="navtoggle" class="navbtn" aria-label="Menu">&#9776; Menu</label>
-<nav id="mainnav"><a href="why.html">Why</a><a href="#why">Enhancements</a><a href="#screenshots">Screenshots</a><a href="#numbers">Speed</a><a href="#tech">Details</a><a href="#next">Next</a><a href="#download">Download</a><a href="#limits">Limitations</a><a href="#credits">Credits</a><a href="https://github.com/nitroos-org">GitHub</a></nav></div></header>
+<nav id="mainnav"><a href="#mission">Why</a><a href="#why">Enhancements</a><a href="#screenshots">Screenshots</a><a href="#numbers">Speed</a><a href="#tech">Details</a><a href="#next">Next</a><a href="#download">Download</a><a href="#limits">Limitations</a><a href="#credits">Credits</a><a href="https://github.com/nitroos-org">GitHub</a></nav></div></header>
 <div class="hero"><div class="wrap">
 <h1>An open-source, Windows-compatible operating system, built on ReactOS</h1>
-<p class="lead">That is our aim. NitroOS takes <a href="https://reactos.org">ReactOS</a> and adds major enhancements: current 64-bit and 32-bit apps side by side, .NET Framework 4.8, PowerShell 7, NTFS by default and a firewall that is on. Release 2026.11-1. <a href="why.html">Why we are building it</a>.</p>
+<p class="lead">That is our aim. NitroOS takes <a href="https://reactos.org">ReactOS</a> and adds major enhancements: current 64-bit and 32-bit apps side by side, .NET Framework 4.8, PowerShell 7, NTFS by default and a firewall that is on. Release 2026.11-1. <a href="#mission">Why we are building it</a>.</p>
 <a class="btn" href="#download">Download</a><a class="btn alt" href="https://github.com/nitroos-org/releases">Source and changelog</a>
 <br><a href="img/hero.webp"><img class="shot" src="img/hero.webp" alt="NitroOS running Chrome, Visual Studio Code and the Features dialog" width="1100" height="358"></a>
 </div></div>
 <div class="wrap"><div class="notice">NitroOS is based on <a href="https://reactos.org">ReactOS</a> and is not affiliated with or endorsed by the ReactOS project. ReactOS is a trademark of the ReactOS project. Report problems from NitroOS to <a href="https://github.com/nitroos-org/releases/issues">this project</a>, not to ReactOS. Alpha-quality software: use a virtual machine. Tested under QEMU/KVM only.</div></div>
+<section id="mission"><div class="wrap prose"><h2>Why NitroOS</h2>
+<p>We want an open-source operating system that runs Windows software well enough to use every day. Done by hand, that is the work of decades: ReactOS has been building it since 1998, and NitroOS stands on that work. With AI coding agents working under a human maintainer, we think it can be months. The first NitroOS release came out on 20 October 2026; three weeks and six releases later, Chrome, Firefox, Edge, VS Code, PowerShell 7 and .NET Framework 4.8 programs run.</p>
+<ul class="tight">
+<li><b>Daily use first:</b> the programs people actually use, batteries included, a release every week or two.</li>
+<li><b>Measured, not claimed:</b> benchmarks published, including where we are slower; compatibility shown in screenshots.</li>
+<li><b>Done properly:</b> behaviour matched to Windows, clean-room sources only, and every change reviewed by a second AI model and tested before it lands.</li>
+</ul>
+<p><b>The end goal is to merge all relevant work back into ReactOS.</b> ReactOS does not accept AI-generated contributions today, and we respect that. If its policy allows it in the future, we want this work upstream. Until then, NitroOS is an open-source (GPL) downstream; how we work is in our <a href="https://github.com/nitroos-org/.github/blob/main/AI-POLICY.md">AI policy</a>.</p>
+</div></section>
 <section id="why"><div class="wrap"><h2>Major enhancements</h2><p class="sub">What NitroOS adds on top of ReactOS, in release 2026.11-1.</p>
 <h3 class="grouphead">Apps</h3><div class="cards">
 <div class="card"><h3>Current apps run</h3><p>Chrome 157, Firefox 159, Edge (with its own sandbox on), VS Code 1.145 and PowerShell 7.6 start and work. <a href="#screenshots">Screenshots</a></p></div>

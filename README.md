@@ -31,7 +31,13 @@ This repository (`nitroos-org/releases`, formerly "reactos-nitro") publishes the
 
 ## Why NitroOS
 
-We want an open-source operating system that runs Windows software well enough to use every day. Done by hand, that is the work of decades; ReactOS has been doing it since 1998, and NitroOS is built on its work. With AI coding agents, under a human maintainer, we think it can be months: the first NitroOS release came out on 20 October 2026, and three weeks and six releases later Chrome, Firefox, Edge, VS Code, PowerShell 7 and .NET Framework 4.8 programs run. We optimise for daily use, ship often, measure instead of claiming, and keep to clean-room rules and Windows behaviour. More: [nitroos.org/why](https://nitroos.org/why.html).
+We want an open-source operating system that runs Windows software well enough to use every day. Done by hand, that is the work of decades: ReactOS has been building it since 1998, and NitroOS stands on that work. With AI coding agents working under a human maintainer, we think it can be months. The first NitroOS release came out on 20 October 2026; three weeks and six releases later, Chrome, Firefox, Edge, VS Code, PowerShell 7 and .NET Framework 4.8 programs run.
+
+- **Daily use first:** the programs people actually use, batteries included, a release every week or two.
+- **Measured, not claimed:** benchmarks published, including where we are slower; compatibility shown in screenshots.
+- **Done properly:** behaviour matched to Windows, clean-room sources only, and every change reviewed by a second AI model and tested before it lands.
+
+**The end goal is to merge all relevant work back into ReactOS.** ReactOS does not accept AI-generated contributions today, and we respect that. If its policy allows it in the future, we want this work upstream. Until then, NitroOS is an open-source (GPL) downstream; how we work is in our [AI policy](https://github.com/nitroos-org/.github/blob/main/AI-POLICY.md).
 
 ## Major enhancements
 
