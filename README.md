@@ -266,7 +266,7 @@ Choose the 64-bit ISO unless you need a 32-bit system; all screenshots on this p
 
 From the 2026.11-1 release notes and our own testing:
 
-- **Data corruption risk on 64-bit (found after release, fixed in 2026.11-2).** When memory is low, a driver that needs a block of physical memory (for example the network or disk driver) can be given memory that still belongs to a running program. That program's data can be overwritten, or the system can stop with error 0x7E or 0x1E. It affects the 64-bit version with paging on, which is the default; the 32-bit version and the live CD are not affected. Workaround until 2026.11-2: turn paging off with
+- **Data corruption risk on 64-bit (found after release; the fix will ship in 2026.11-2).** When memory is low, a driver that needs a block of physical memory (for example the network or disk driver) can be given memory that still belongs to a running program. That program's data can be overwritten, or the system can stop with error 0x7E or 0x1E. It affects the 64-bit version with paging on, which is the default; the 32-bit version and the live CD are not affected. Workaround until 2026.11-2: turn paging off with
   `reg add "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management" /v NitroPager /t REG_DWORD /d 0 /f`
   and restart. Programs can then use less memory than with paging on.
 - NitroOS is alpha software and has been tested only in QEMU/KVM virtual machines. Real hardware is untested; in particular, the interrupt handling for real multi-processor machines (the APIC HAL) is not covered.
