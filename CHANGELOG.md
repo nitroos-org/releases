@@ -1,6 +1,650 @@
 # reactos-nitro changelog
 
-reactos-nitro is an unofficial patch set on top of upstream ReactOS. It is not an official ReactOS release and is not affiliated with the ReactOS project. Newest entry first. All times UTC.
+NitroOS (reactos-nitro) is an open-source, Windows-compatible operating system based on ReactOS, with our own enhancements. It is not affiliated with the ReactOS project. Newest entry first. All times UTC.
+
+## reactos-nitro 2026.11-2
+
+Tagged `nitro-2026.11-2` (2026-11-17) at fork main [`ae33cd4badf`](https://github.com/nitroos-org/reactos/commit/ae33cd4badf81a7e0ef2cb9c91b4c8f133d03e7d). 453 changes since 2026.11-1. The headline is IPv6, which is now on by default and a first-class network protocol: router-advertised and temporary (privacy) addresses, a DHCPv6 client, Windows' rules for choosing addresses, and raw IPv6 sockets, tested against a real home router. Writes to NTFS are faster thanks to group commit. The release also brings registry security descriptors that behave as on Windows, a cryptographic system random number generator, a minifilter-grade Filter Manager, the fix for the 64-bit data corruption issue found after 2026.11-1, and a weekly upstream sync.
+
+| Item | Value |
+|---|---|
+| Release tag | `nitro-2026.11-2` → [`ae33cd4badf`](https://github.com/nitroos-org/reactos/commit/ae33cd4badf81a7e0ef2cb9c91b4c8f133d03e7d) |
+| ReactOS base | upstream [`8fe3cee0560`](https://github.com/reactos/reactos/commit/8fe3cee05606aecd9442674e40038649f048d10d) "[NDK] Declare HalGetInterruptSource on ARM64" (2026-11-10, weekly sync #5; 96 upstream commits since `e46f4bb1a1e`) |
+| Patch | one cumulative patch over `8fe3cee0560` (`git diff --binary`, 115 binary files; apply with `git apply --binary`); the applied tree `78cfcdd45450` is byte-identical to the tag |
+| Artifacts | amd64-wow64 ISO, i386 ISO (both on repo.nitroos.org), source tarball, cumulative patch, SHA256SUMS |
+
+### Highlights
+453 changes (451 merges, 2 direct commits). The main tracks:
+
+- **IPv6 on by default, as a first-class protocol:** stateless autoconfiguration from router advertisements (including DNS servers and the search list), temporary privacy addresses (RFC 8981, on by default as in Windows 10), a DHCPv6 client (stateless and stateful; `ipconfig /renew6` and `/release6`), duplicate address detection, MLD listener reports, destination and source address selection by RFC 6724 with the Windows prefix policy table, raw IPv6 sockets with Windows' access rule, IPv6 firewall rules, `netsh interface ipv6`, IPv6 in the PowerShell network modules, and WinHTTP and WinINet over IPv6. Tested against a real home router: autoconfiguration, a temporary address, DHCPv6, DNS and HTTPS over IPv6. `Ipv6Enable = 0`, or the Windows value `DisabledComponents`, turns IPv6 off on the network adapters as on Windows (the loopback interface keeps it).
+- **IPv6 settings in the network connection properties:** an "Internet Protocol Version 6 (TCP/IPv6)" entry with its properties page, as on Windows. In this release the IPv4 and IPv6 check boxes there are read-only.
+- **IPv4 multicast with IPv6 on:** groups that a program joins now reach it (before, they never reached the network driver while IPv6 was on).
+- **Faster NTFS writes (group commit):** write-through writes that extend a file are committed to the journal in groups (at a flush, at close, every 32 MB or every second) instead of one journal commit per write; file data is still written before the new file size. In our matched test, sequential unbuffered writes are about 1.5 to 1.85 times faster than before the change. `NoGroupCommit=1` in the ntfsng service key restores the old behaviour.
+- **Fix for the 64-bit data corruption issue found after 2026.11-1:** a driver that asks for a block of physical memory is never given a page that still belongs to a program. Paging stays on by default on 64-bit.
+- **Registry security as on Windows:** keys store and inherit real security descriptors and report and change them as Windows 10 does (owner checks, auto-inheritance, protected keys); hive roots, SAM and SECURITY carry the Windows 10 descriptors. Access checks run in audit mode: they log what Windows would deny, and nothing is refused yet.
+- **Security:** a cryptographic system random number generator (ChaCha20, seeded from the CPU's hardware generator and timing jitter), service accounts as on Windows (NT SERVICE SIDs, password-less service logons for trusted callers only), and 8 security fixes in the kernel, win32k, RPC and networking, described generically below.
+- **NTLM without an external helper** (NTLMv2 and session security), RPC with NTLM authentication, and same-machine NTLM handled as a local call.
+- **Filter Manager:** minifilter-grade (altitudes, instances, contexts, communication ports, fast I/O).
+- **Memory manager:** a 128 TiB user address space on amd64 (as on Windows 8.1 and later), page-file-backed reserved sections up to 8 TB, `FlushViewOfFile` writes the view's pages, the pager reads and writes the page file in clusters, faster cached sequential reads.
+- **Composition for Office:** more of Windows.UI.Composition and DirectComposition; Word now gets as far as its Start screen (it does not run yet, see Limitations).
+- **Locales and time zones:** 231 locales generated from Unicode CLDR 49 (85 more than 2026.11-1) with date, number and currency formats closer to Windows, and 143 time zones with display names in a new `tzres.dll`.
+- **Apps:** Oracle Database XE 21c installs with its setup.exe on the first run (EM Express does not load yet, see Limitations), Java reports Windows 10 and can use the large address space, Go 1.26 programs run, MariaDB, the Windows App SDK runtime of PowerToys loads, and `rustup` works.
+- **Upstream sync #5:** ReactOS master `8fe3cee0560` (96 upstream commits, including the new USB3 stack, which NitroOS does not enable by default yet).
+
+### What reactos-nitro adds on top of ReactOS
+Everything from the previous releases, plus the following in this release.
+
+#### Networking
+IPv6 on by default (see Highlights and the IPv6 notes under Limitations). Also: IPv4 multicast with IPv6 on; a UDP "port unreachable" reported as `WSAECONNRESET` for both families, as on Windows; IPv4 answers datagrams to closed ports; `localhost` resolves to `::1` first, as on Windows; firewall Allow rules with a condition the filter cannot match are refused (narrower than Windows, never broader); a DHCP client crash with two adapters fixed; TCP, AFD and DNS fixes.
+
+#### NTFS and storage
+NTFS-NG group commit, faster directory listing and small-file reads and creates, caches that scale with memory and shrink under pressure, extended directory change notifications, 512 KB ATA commands on AHCI, and write-through on AHCI made durable (queued FUA only on drives that advertise it).
+
+#### Kernel and memory
+The 64-bit data corruption fix, the 128 TiB user address space, 8 TB reserved sections, a real `FlushViewOfFile`, page-file clustering and read-ahead, the Filter Manager, wait completion packets and reserve objects (Go 1.26), more registry calls (NtQueryMultipleValueKey, NtCompactKeys, the transacted key calls), and sessions P3 and P4 (a second session with its own win32k, off by default behind a flag).
+
+#### Security
+The cryptographic random number generator, service virtual accounts, registry security descriptors (audit mode), NTLM, and 8 security fixes described generically below.
+
+#### Display and compositor
+More of Windows.UI.Composition and DirectComposition (DesktopWindowTarget, CompositorController, nine-grid brushes, interaction trackers), redirected window surfaces with dirty-rectangle presentation (off by default), DirectWrite fallback fonts, robust GDI arcs and ellipses, Direct3D 11 WARP devices created as on Windows.
+
+#### WoW64
+32-bit processes can save, load and replace registry hives and start 32-bit children under a 32-bit debugger, and more window messages are translated (WM_HELP, owner-draw, MDI create, drag and IME messages).
+
+#### Locales and setup
+231 locales from Unicode CLDR 49, 143 time zones, event logs sized as on Windows 10, help and support links that point to NitroOS, and "based on ReactOS" wording in the watermark, the About box and setup.
+
+#### Other
+Heap and exception performance (lock-free vectored handlers, a heap front end at the Windows 10 thresholds), `QueueUserWorkItem` 3.1 times faster, Software Licensing answers that Office needs, the Authenticode signing APIs, Little CMS 2.20 in mscms, and reproducible-build options.
+
+## Bug fixes
+
+The 453 changes on the fork's first-parent history between `nitro-2026.11-1` and this release (451 merges and 2 direct commits), grouped by area. Each line links the commit on the fork. 8 security-relevant fixes are described generically. This section lists only what is new in 2026.11-2; everything from 2026.11-1 is included (see its section below).
+
+<details><summary>Kernel: Ke/HAL/amd64 (12 fixes)</summary>
+
+- An interrupt that joins a shared vector gets its dispatch routine (disconnecting the vector's first interrupt jumped to address 0) ([7349b6c07a7](https://github.com/nitroos-org/reactos/commit/7349b6c07a7))
+- The amd64 KDBG backtrace reads only mapped, canonical memory and stops cleanly on a bad frame instead of faulting in the debugger ([8346bb76e77](https://github.com/nitroos-org/reactos/commit/8346bb76e77))
+- KDBG resumes correctly after its own breakpoint (cont no longer crashes), and a cleared breakpoint is not planted again ([cea65a0ef0f](https://github.com/nitroos-org/reactos/commit/cea65a0ef0f))
+- Amd64 restarts an interlocked S-list pop that faulted on an entry another processor popped and freed (bugcheck 0x50 under fast thread create/exit) ([fc5faf7bc78](https://github.com/nitroos-org/reactos/commit/fc5faf7bc78))
+- Wait completion packets without a kernel thread each: a wait block satisfied from the signal path queues the packet (no per-process or system cap needed; behaviour as measured on Windows 10) ([1fb882613b6](https://github.com/nitroos-org/reactos/commit/1fb882613b6))
+- Explicit reserves below 64 KB refused as on Windows 10 (legacy VDM reserves kept); kdb prints the saved fault address; PageFaultAddress and MmPager tests made robust ([ee3abfd5565](https://github.com/nitroos-org/reactos/commit/ee3abfd5565))
+- Amd64 user exception dispatch raises a stack overflow before retrying without extended state; unwinder skips spare codes instead of asserting; UserModeException expectations for AMD ([22e064a63b8](https://github.com/nitroos-org/reactos/commit/22e064a63b8))
+- Amd64 access violations report the faulting address saved on entry, not a late CR2 read (JVM safepoint/implicit null-check crashes) ([a2eae093d2f](https://github.com/nitroos-org/reactos/commit/a2eae093d2f))
+- KeQueryBasePriorityThread reads the thread's own process, so a query during a detach no longer faults under the thread lock (soak hang and BAD_POOL_CALLER); amd64 bugchecks IRQL_GT_ZERO_AT_SYSTEM_SERVICE as i386 does ([f3ead6b0713](https://github.com/nitroos-org/reactos/commit/f3ead6b0713))
+- Write-protected system image pages clear the bit the CPU checks on the SMP kernel; KDBG writes kernel code through the physical alias ([ed91792ca48](https://github.com/nitroos-org/reactos/commit/ed91792ca48))
+- MmAllocatePagesForMdl zeroes the pages it returns unless the caller asks otherwise; physical-range retry after purging standby; #GP report checks the address before reading it ([10311c6383a](https://github.com/nitroos-org/reactos/commit/10311c6383a))
+- The x86 APIC HAL reports the IRQL a vector was allocated with when a shared I/O APIC input is translated again (devices sharing a line connected at IRQL 26 and 10 with separate locks: bugcheck 0x0F in KiChainedDispatch with e1000 ... ([0319e2e6bed](https://github.com/nitroos-org/reactos/commit/0319e2e6bed))
+
+</details>
+
+<details><summary>Kernel: Mm/Cc (41 fixes)</summary>
+
+- MM page waits: a fault waits for the I/O on a busy section page instead of a tick (segment-lock-only sites keep the tick wait) ([2275b96de63](https://github.com/nitroos-org/reactos/commit/2275b96de63))
+- Cc views unmapped lazily are flushed from the TLB in batches, and no page, segment reference, commit or range of such a view is released before its flush (small_read 1.4-1.5x) ([2c741bf8156](https://github.com/nitroos-org/reactos/commit/2c741bf8156))
+- The lazy writer locks the file for the flush when it deletes a cache map (a paging write could set a valid data length above the file size) ([af336ad3e4c](https://github.com/nitroos-org/reactos/commit/af336ad3e4c))
+- The CacheAligned pool types return cache-line-aligned blocks (small blocks carved from a larger one) ([0935758dda5](https://github.com/nitroos-org/reactos/commit/0935758dda5))
+- The lazy writer keeps a range pinned for writing out of its writes until it is unpinned (at most 10 s), so a file system's half-made changes never reach the disk ([0303611690c](https://github.com/nitroos-org/reactos/commit/0303611690c))
+- SystemPerformanceInformation reports FreeSystemPtes; the MmMdl kmtest no longer leaks 512 system PTEs per run ([cc1c9a703a6](https://github.com/nitroos-org/reactos/commit/cc1c9a703a6))
+- A contiguous allocation fails cleanly when its pages cannot be mapped (no assert on system PTE exhaustion) ([ab5dd1d138a](https://github.com/nitroos-org/reactos/commit/ab5dd1d138a))
+- A cached contiguous block from nonpaged pool is cache-line aligned (i386 e1000 had no network since the cached descriptor rings) ([74bac482445](https://github.com/nitroos-org/reactos/commit/74bac482445))
+- A data view cannot be reprotected beyond the protection it was mapped with ([9804d2b14f0](https://github.com/nitroos-org/reactos/commit/9804d2b14f0))
+- A section page can be mapped by more than 511 address spaces (the 512th process mapping a shared page such as ntdll's bugchecked MEMORY_MANAGEMENT); 64-bit entries get a 24-bit share count, 32-bit counts saturate ([fffbcad31be](https://github.com/nitroos-org/reactos/commit/fffbcad31be))
+- Amd64 sparse prototype PTE store: a leaked chunk stays counted to its owner, Debug fault-injection knobs, documented commit charge, and tests for the per-process and system share of the range ([954cb6b70f6](https://github.com/nitroos-org/reactos/commit/954cb6b70f6))
+- The NT default critical section timeout (30 days) instead of 2.5 minutes (a lock held that long by a software renderer raised STATUS_POSSIBLE_DEADLOCK) ([93f3e0883a6](https://github.com/nitroos-org/reactos/commit/93f3e0883a6))
+- A 64-bit process without LARGEADDRESSAWARE gets system-chosen addresses below 2 GB (relocated DLLs, allocations and views without a requested address) ([256f22cf5a4](https://github.com/nitroos-org/reactos/commit/256f22cf5a4))
+- Reapply "Merge: amd64 SEC_RESERVE page-file sections up to 8 TB (sparse Prototype PTE store: charged as commit, resident store capped at 1/32 of RAM, bounded page wait) and a section view keeps the protection limits of Windows 10 ... ([0dbac997704](https://github.com/nitroos-org/reactos/commit/0dbac997704))
+- Revert "Merge: amd64 SEC_RESERVE page-file sections up to 8 TB (sparse Prototype PTE store: charged as commit, resident store capped at 1/32 of RAM, bounded page wait) and a section view keeps the protection limits of Windows 10 ... ([54bd9ff7242](https://github.com/nitroos-org/reactos/commit/54bd9ff7242))
+- A relocated 64-bit DYNAMICBASE image is placed high, as on Windows (the .NET JIT no longer recompiles methods without optimization: PowerShell 7 arithmetic loop 3x faster) ([069e20aaee2](https://github.com/nitroos-org/reactos/commit/069e20aaee2))
+- The VDL-limited image page-in read is clamped to the length asked for (no MDL longer than the read for a truncated image section) ([c1bf3f52732](https://github.com/nitroos-org/reactos/commit/c1bf3f52732))
+- Amd64 SEC_RESERVE page-file sections up to 8 TB (sparse Prototype PTE store: charged as commit, resident store capped at 1/32 of RAM, bounded page wait) and a section view keeps the protection limits of Windows 10 (NOACCESS views) ([74e7a84611f](https://github.com/nitroos-org/reactos/commit/74e7a84611f))
+- The PhysicalMemory user-map bound is computed without 64-bit wrap ([7851c23239d](https://github.com/nitroos-org/reactos/commit/7851c23239d))
+- User-mode map of \Device\PhysicalMemory past the highest RAM page at NT 10 (bounded by the CPU's physical address width); views starting past a section with no size are refused before any size arithmetic ([63dd3eebc0a](https://github.com/nitroos-org/reactos/commit/63dd3eebc0a))
+- A section view keeps the protection it was mapped with: no protection change or commit beyond it (STATUS_SECTION_PROTECTION, as Windows 10) ([653404cbd84](https://github.com/nitroos-org/reactos/commit/653404cbd84))
+- Process start-up stack 3 pages as on Windows (manifest code no longer copies its XML buffer per element); stack overflow from the third page and top-guard re-arm as on Windows 10 ([3d78a53bcb1](https://github.com/nitroos-org/reactos/commit/3d78a53bcb1))
+- A guard page in the last pages of a stack raises the stack overflow again after an earlier one (JVM StackOverflowError on worker threads) ([bd09f92a4d8](https://github.com/nitroos-org/reactos/commit/bd09f92a4d8))
+- A file flush harvests the dirty bits of every user mapping (non-cached reads see mapped writes, as measured on Windows 10), flush write failures are reported, writes in flight are waited for ([a8720ca4f40](https://github.com/nitroos-org/reactos/commit/a8720ca4f40))
+- NitroPager follow-ups: balancer pass count (no lost wakeup), read-ahead wait flag cleared per fault in a private ETHREAD byte, scarce-slot hysteresis, copies-dropped/read-ahead-wait counters ([479fc0c9dd3](https://github.com/nitroos-org/reactos/commit/479fc0c9dd3))
+- Amd64 requires CMPXCHG16B as Windows 8.1+ (16-byte SLISTs for the 128 TiB range); user page-table bounds through PML4 slot 255; 64-bit commitment counts; VirtualAllocLarge checks commit accounting ([35b8e737144](https://github.com/nitroos-org/reactos/commit/35b8e737144))
+- Debug builds bugcheck 0xA / 0xD1 on a kernel page fault at raised IRQL, as Windows (Release unchanged) ([795528a4dcc](https://github.com/nitroos-org/reactos/commit/795528a4dcc))
+- Amd64 user address range 128 TiB as on Windows 8.1+ (MariaDB InnoDB 8 TiB reserve, Java ZGC) ([d740c21159e](https://github.com/nitroos-org/reactos/commit/d740c21159e))
+- A process created into another session joins it only while the session is live (else ACCESS_DENIED); CreateProcessAsUser cleans up every failure path; a session's last process leaves it once ([6ae175c43a3](https://github.com/nitroos-org/reactos/commit/6ae175c43a3))
+- FlushViewOfFile takes dirty bits in batches with one TLB flush per batch and walks large views in 4 MB chunks, dropping the locks between chunks ([c90e3d526bf](https://github.com/nitroos-org/reactos/commit/c90e3d526bf))
+- NitroPager reads and writes the page file in clusters of up to 256 KB, keeps free slots in runs, waits once for the balancer instead of reading a single page, and wakes every waiter of a balancer pass (1 GB second pass 21 s -> ... ([cafce2fe61b](https://github.com/nitroos-org/reactos/commit/cafce2fe61b))
+- FlushViewOfFile writes the view's dirty pages to the file (MmFlushVirtualMemory was a stub); data written through a mapped view survives a power cut after FlushViewOfFile + FlushFileBuffers ([bfa611aea25](https://github.com/nitroos-org/reactos/commit/bfa611aea25))
+- After boot a freed page goes to the head of the free lists, so never-touched memory is not handed out first ([3892aa1299a](https://github.com/nitroos-org/reactos/commit/3892aa1299a))
+- Session images (one address, per-session pages, cookie and protections; session imports per importer), gated by NitroSessions (off by default) ([ccdf3f2e643](https://github.com/nitroos-org/reactos/commit/ccdf3f2e643))
+- No read-ahead retry from a retired paging file (STATUS_FILE_INVALID instead of a NULL dereference), prefetch statistics only without a retry ([b6d91250222](https://github.com/nitroos-org/reactos/commit/b6d91250222))
+- Contiguous and physical-range page searches never take a standby page (data corruption / kernel #GP under memory pressure with NitroPager); amd64 reports an unexplained kernel #GP on the debug port ([7350df4d988](https://github.com/nitroos-org/reactos/commit/7350df4d988))
+- A failed read-ahead page no longer fails the faulting page (re-read alone); read-ahead pages signal their in-page event ([5a6daf7ed33](https://github.com/nitroos-org/reactos/commit/5a6daf7ed33))
+- NitroPager reads up to 15 following page-file pages in one I/O on a page-file fault (1 GB second pass 39-86 s -> 7-16 s) ([1a9647bc53a](https://github.com/nitroos-org/reactos/commit/1a9647bc53a))
+- Cached sequential read at Windows 10 parity (kernel gap-search hint, view lookup from the last hit, resident pages of a view mapped in one pass, paging reads up to 256 KB) ([31128097956](https://github.com/nitroos-org/reactos/commit/31128097956))
+- With NitroPager on and a paging file present, private pageable user commitment is limited by RAM plus paging files (MmTotalCommitLimit minus headroom and the critical reserve) and waits for the paging file to grow; each VAD ... ([a572caf5b65](https://github.com/nitroos-org/reactos/commit/a572caf5b65))
+- Callers that used MiRemoveAnyPage/MiRemoveZeroPage's 0 as a page now wait for the balancer (bounded) or fail cleanly; MiFillSystemPageDirectory re-tests the PDE after the wait (review rvpagerfu) ([e8337bc0613](https://github.com/nitroos-org/reactos/commit/e8337bc0613))
+
+</details>
+
+<details><summary>Kernel: Ob/Se/Ps/Ex/registry (46 fixes)</summary>
+
+- Security fix (described generically): hardening in this area; details withheld until users have had time to update ([1b87351e57e](https://github.com/nitroos-org/reactos/commit/1b87351e57e))
+- Registry DACL propagation: a hive root inherits from the root of its class, a parent the caller cannot read passes on nothing ([7cc15233d0e](https://github.com/nitroos-org/reactos/commit/7cc15233d0e))
+- No kernel handle and pool leak on each device start: resource-map keys, interface GUID string, device security descriptor, NDIS bind registry path ([a50eb967e37](https://github.com/nitroos-org/reactos/commit/a50eb967e37))
+- Hive key flags follow-ups: one-shot upgrade, ControlSet keys and the WoW64 view like Windows, upgrade never rewrites an admin-changed key ([277652ed299](https://github.com/nitroos-org/reactos/commit/277652ed299))
+- Registry DACL propagation leaves keys that are not auto-inherited alone and flags them protected, as Windows does ([fb5ddc3fc1a](https://github.com/nitroos-org/reactos/commit/fb5ddc3fc1a))
+- No handle to a process or thread before its creator inserted it (bugcheck 0x1E in ObInsertObject from PspCreateProcess) ([04d7f27f30e](https://github.com/nitroos-org/reactos/commit/04d7f27f30e))
+- System hive keys carry the Windows DACL control flags (auto-inherited, protected), existing installs upgraded at logon ([b0192d78f76](https://github.com/nitroos-org/reactos/commit/b0192d78f76))
+- Registry DACL merge drops redundant inherited ACEs and marks covered copies inherit-only, as Windows does ([8ceb8813825](https://github.com/nitroos-org/reactos/commit/8ceb8813825))
+- A DACL-only query of a registry key judges inherited ACEs with the key's owner ([2cef8ad66c5](https://github.com/nitroos-org/reactos/commit/2cef8ad66c5))
+- SetSecurityInfo on a registry key does DACL auto-inheritance (children whose DACL is the parent's inherited tail follow it; any other key is left alone) ([26823e845de](https://github.com/nitroos-org/reactos/commit/26823e845de))
+- NtUnloadKey no longer fails with STATUS_CANNOT_DELETE for keys waiting only on their delayed release ([1d3537408c8](https://github.com/nitroos-org/reactos/commit/1d3537408c8))
+- Security fix (described generically): hardening in this area; details withheld until users have had time to update ([ee2a965c434](https://github.com/nitroos-org/reactos/commit/ee2a965c434))
+- Security fix (described generically): hardening in this area; details withheld until users have had time to update ([33865c274e6](https://github.com/nitroos-org/reactos/commit/33865c274e6))
+- NtQueryOpenSubKeys(Ex) keep their temporary key handle in the kernel handle table ([399df85065a](https://github.com/nitroos-org/reactos/commit/399df85065a))
+- Tokens and objects created with an explicit SACL report SE_SACL_AUTO_INHERITED, as on Windows ([bbeee7e45c4](https://github.com/nitroos-org/reactos/commit/bbeee7e45c4))
+- Implement NtQueryMultipleValueKey, NtQueryOpenSubKeysEx and NtCompactKeys (validated no-op) ([ba4a1250162](https://github.com/nitroos-org/reactos/commit/ba4a1250162))
+- KUSER_SHARED_DATA.NtBuildNumber holds the build number (19045) as on Windows 10 (it read 0) ([69e720a9017](https://github.com/nitroos-org/reactos/commit/69e720a9017))
+- Registry ACL R4: keys report and change their own security descriptor (owner checks, SACL with ACCESS_SYSTEM_SECURITY, notifications, last write time) as measured on Windows 10; opens are not enforced yet ([798ee48af4e](https://github.com/nitroos-org/reactos/commit/798ee48af4e))
+- 32-bit processes under WoW64 can save, load, unload and replace registry hives (the NtSaveKey/NtLoadKey family had no WoW64 thunks) ([de119b52fcc](https://github.com/nitroos-org/reactos/commit/de119b52fcc))
+- Registry KCB fixes: the delayed-close size is clamped to its 12-bit field (a large DelayCloseSize no longer bugchecks), MaxValueDataLen above 64 KB is not truncated (i386 Debug assertion), and a root key's NCB failure does not ... ([d8b054455ea](https://github.com/nitroos-org/reactos/commit/d8b054455ea))
+- A registry name control block reference count no longer wraps after 65535 open keys of one name (the block was freed while still in use: bugcheck 0x7E / pool corruption) ([13b4c7d7e9b](https://github.com/nitroos-org/reactos/commit/13b4c7d7e9b))
+- Existing event logs take the MaxSize of the registry (grown in place or by moving the wrapped records, never truncated); the old 512 KB/7-day defaults migrate to the Windows 10 values ([745cb56d97c](https://github.com/nitroos-org/reactos/commit/745cb56d97c))
+- Registry ACL R3 follow-ups (storage switches only from admin-protected keys, creator descriptor checked as on Windows, bounded security-cell cache for linear hive loads), gated with the setup-time NULL-SACL templates ([58ffde8e4d4](https://github.com/nitroos-org/reactos/commit/58ffde8e4d4))
+- GCC __writeeflags is a compiler memory barrier (memory clobber), so no access moves across the popf that restores interrupts; the per-site barriers it makes redundant are removed ([e4c5eb694d5](https://github.com/nitroos-org/reactos/commit/e4c5eb694d5))
+- Amd64 ERESOURCE lock and per-CPU handle cache held with interrupts disabled instead of an IRQL raise/lower pair, NTFS-NG call-site accounting lock-free (registry open/close -22%, events -15%, file handles -16%); IRQL benchmark ... ([b67b107c313](https://github.com/nitroos-org/reactos/commit/b67b107c313))
+- A present NULL DACL or SACL (offset 0) is a valid relative security descriptor, as on Windows; the registry root descriptors keep the NULL SACL present like Windows 10 ([824a4cfaacd](https://github.com/nitroos-org/reactos/commit/824a4cfaacd))
+- Registry hive roots, SAM, SECURITY and the override keys get the Windows 10 security descriptors at build and setup time (mkhive, usetup, samsrv, userenv; nothing enforced yet) ([6d9adbf16b0](https://github.com/nitroos-org/reactos/commit/6d9adbf16b0))
+- Registry ACL R3: keys store a real security descriptor on create (inherited from the parent as Windows does, shared cells, kept across save/reload/rename); queries and opens unchanged ([edf6b377992](https://github.com/nitroos-org/reactos/commit/edf6b377992))
+- RegLoadMUIStringW follows the documented contract (non-@ values, pcbData, base directory, truncation); EnumDynamicTimeZoneInformation sets ERROR_SUCCESS (advapi32 registry winetest 530 -> 68 failures) ([0383ed8265f](https://github.com/nitroos-org/reactos/commit/0383ed8265f))
+- SetEntriesInAcl REVOKE_ACCESS keeps the trustee's deny entries and old entries keep their order; registry functions on the HKEY_PERFORMANCE_* keys answer as Windows ([9b8068114a9](https://github.com/nitroos-org/reactos/commit/9b8068114a9))
+- Registry ACL audit mode, default on, no change to any open or create (logs what Windows would deny; /REGACL boot switch; the log writer stops before the file systems at shutdown) ([e278fb01803](https://github.com/nitroos-org/reactos/commit/e278fb01803))
+- SeFilterToken treats NULL optional lists as none (no empty restricted token); HKEY_PERFORMANCE_DATA serves Counter/Help/Explain names by prefix with the End Marker entry; advapi32 registry and security winetests run to the end ([fd3ce79d791](https://github.com/nitroos-org/reactos/commit/fd3ce79d791))
+- Windows.Foundation.Metadata.ApiInformation in wintypes (answers what NitroOS provides: contracts as RoIsApiContractPresent, registered classes, own members), registered in both registry views ([78c08d0cc6c](https://github.com/nitroos-org/reactos/commit/78c08d0cc6c))
+- NtSetIoCompletionEx uses its IoCompletionReserve as packet storage (one packet per reserve, as on Windows), NtQueryObject handle flags (Inherit as BOOLEAN, protect-from-close) and non-paged pool type as on Windows 8+ ([cae04d097f4](https://github.com/nitroos-org/reactos/commit/cae04d097f4))
+- Kernel routines drivers import (ExAllocatePool2/3, IoCreateSystemThread, IoWMISetNotificationCallback, IoValidateDeviceIoControlAccess, wdmsec IoCreateDeviceSecure, Ob WithTag, processor groups, extended lookasides), first-call ... ([310806ab075](https://github.com/nitroos-org/reactos/commit/310806ab075))
+- The 32-bit registry view holds the same Windows NT\CurrentVersion version values as the 64-bit view, as on Windows ([51190baa432](https://github.com/nitroos-org/reactos/commit/51190baa432))
+- The registry value CurrentVersion is "6.3" on Windows 10, as on Windows (installers compare it as a string) ([661780db960](https://github.com/nitroos-org/reactos/commit/661780db960))
+- The configuration manager finds a value by name through a per-key table of value names and reads value lists under the shared KCB lock; RegEnumValueA asks for each value once ([811f96f3679](https://github.com/nitroos-org/reactos/commit/811f96f3679))
+- A failed open procedure takes back the handle counts instead of asserting; ConsoleCtrlEventRace no longer floods processes with handler threads ([e7401c36fb6](https://github.com/nitroos-org/reactos/commit/e7401c36fb6))
+- Process creation into another session (SeTcbPrivilege, session must exist), CreateProcessAsUser through CreateProcessInternalW; Windows parity measured for a token naming a missing session (access denied) and a foreign-session ... ([e64860ec78e](https://github.com/nitroos-org/reactos/commit/e64860ec78e))
+- Wait completion packets (NtCreate/NtAssociate/NtCancelWaitCompletionPacket) with Windows statuses; Go 1.26 programs start and run ([7822b8ede1a](https://github.com/nitroos-org/reactos/commit/7822b8ede1a))
+- Win32k and its GDI drivers load as session images with NitroSessions; session-space lookaside lists and resources stay off the global lists (off by default) ([98fd21627ee](https://github.com/nitroos-org/reactos/commit/98fd21627ee))
+- NtCreateKeyTransacted, NtOpenKeyTransacted(Ex) as system calls (no transaction manager: the handle is validated as on Windows); Office C2R's per-process virtual registry now installs ([9ecdda1f721](https://github.com/nitroos-org/reactos/commit/9ecdda1f721))
+- NtAllocateReserveObject, NtQueueApcThreadEx with a user APC reserve, NtSetIoCompletionEx; wait completion packet entry points (not implemented) ([a009a857640](https://github.com/nitroos-org/reactos/commit/a009a857640))
+- Security fix (described generically): hardening in this area; details withheld until users have had time to update ([e546eb21b61](https://github.com/nitroos-org/reactos/commit/e546eb21b61))
+- (part 2): object type locks are exclusive push locks that their owner may take again (no shared mode: no nested-shared self-deadlock), apitest ObjectLockStress; amd64 PSEH scope records stored member by member (SEH split scan: 0 ... ([590d4455811](https://github.com/nitroos-org/reactos/commit/590d4455811))
+
+</details>
+
+<details><summary>I/O + fs libs (4 fixes)</summary>
+
+- Filter manager follow-ups: FsFilter callbacks for every operation and driver, deleted volumes live until their last reference (waited for on a thread of their own), device deletion notifies once ([8ae174c3b89](https://github.com/nitroos-org/reactos/commit/8ae174c3b89))
+- Filter Manager review findings: post-create at PASSIVE, safe completion processing, section synchronization for minifilters, volume removal without dismount, message buffers as the WDK says, port lock not held across a send, fast ... ([822badfd265](https://github.com/nitroos-org/reactos/commit/822badfd265))
+- Minifilter-grade filter manager (altitudes, instances, contexts, communication ports, fast I/O) with review fixes ([0f963c89734](https://github.com/nitroos-org/reactos/commit/0f963c89734))
+- IoConnectInterruptEx no longer reports success for interrupts it did not connect: line-based connects the device's single translated line interrupt, message-based falls back to it (Version = CONNECT_LINE_BASED) when no message ... ([1854de0d618](https://github.com/nitroos-org/reactos/commit/1854de0d618))
+
+</details>
+
+<details><summary>NTFS (ntfsng) (29 fixes)</summary>
+
+- Group commit for extending non-cached write-through writes (data before size kept; commit at flush, close, 32 MB or 1 s) ([631a88b46c4](https://github.com/nitroos-org/reactos/commit/631a88b46c4))
+- NTFS-NG files no longer stuck until reboot after an open raced with the delete of an earlier file of the same MFT record ([c951061f764](https://github.com/nitroos-org/reactos/commit/c951061f764))
+- NTFS-NG directory listing faster (no 8.3 test for long-only names, snapshot chunk reuse, larger inode hash, inode prefetch) ([404a6267585](https://github.com/nitroos-org/reactos/commit/404a6267585))
+- NTFS-NG allocates after a free without waiting for the journal commit, skipping clusters whose free is not committed yet (and never refusing a write a full volume has room for); per-file tcc compiles -24% ([d330a85e7c8](https://github.com/nitroos-org/reactos/commit/d330a85e7c8))
+- NTFS-NG FcbListLock is a guarded mutex, no IRQL raise/lower per FCB list operation (file open/close -3.5%, GetFileAttributes -6.3%) ([9c8861454ab](https://github.com/nitroos-org/reactos/commit/9c8861454ab))
+- NTFS-NG frees clusters after waiting only for the in-flight transfers on those clusters (not every unlocked transfer on the volume) ([7bf3fa0567a](https://github.com/nitroos-org/reactos/commit/7bf3fa0567a))
+- NTFS-NG page cache limit per mapping scales with memory (long-name directory listing 238 -> 6 ms, small reads 4-9x faster) ([750c86b0f09](https://github.com/nitroos-org/reactos/commit/750c86b0f09))
+- NTFS-NG verbose dump shows the inode cache against its limits ([004d31b2a29](https://github.com/nitroos-org/reactos/commit/004d31b2a29))
+- ReadDirectoryChangesExW and NtNotifyChangeDirectoryFileEx with FILE_NOTIFY_EXTENDED_INFORMATION records (NTFS-NG); Gradle 9 starts ([3a80a5bdb4e](https://github.com/nitroos-org/reactos/commit/3a80a5bdb4e))
+- NTFS-NG builds each paging-write device request as a partial MDL of the caller's MDL, so no request MDL is freed while still mapped (Debug boot assert; leaked system mappings in Release) ([8610cae2ead](https://github.com/nitroos-org/reactos/commit/8610cae2ead))
+- Fewer device register accesses per storage request (AHCI/IDE interrupt), flush SRBs completed at dispatch, and NTFS-NG skips its writeback scan when nothing was made dirty (FlushFileBuffers 1.6x, 4 KB requests ~20% faster on AHCI) ([7d1767391d4](https://github.com/nitroos-org/reactos/commit/7d1767391d4))
+- NTFS-NG bounds the memory of its unused-inode list in bytes as well as by count ([63ab9828903](https://github.com/nitroos-org/reactos/commit/63ab9828903))
+- NTFS-NG takes an existing FCB in the create walk and queries parked FCBs without the volume lock; the I/O manager offers FastIoQueryOpen for by-name attribute queries (git status 153 -> 93 ms) ([5ff04232822](https://github.com/nitroos-org/reactos/commit/5ff04232822))
+- NTFS-NG unlocked paging reads with an unaligned tail, one volume lock per open of an existing file, a per-directory name cache; CopyFileEx reads small sources through the cache (tree copy 3x faster) ([452b419126c](https://github.com/nitroos-org/reactos/commit/452b419126c))
+- NTFS-NG sizes a decompressed runlist from its mapping pairs instead of a whole page (nonpaged per cached inode ~11.4 KB -> ~3.7 KB) ([f31eaca477b](https://github.com/nitroos-org/reactos/commit/f31eaca477b))
+- NTFS-NG gives its nonpaged inode and page cache back while the Mm low-memory condition is signalled ([68ef9520a00](https://github.com/nitroos-org/reactos/commit/68ef9520a00))
+- ATAPI sends queued FUA only to drives that advertise it (write-through durable on AHCI); NTFS-NG write-through data and journal slots in flight together, FUA in place of barrier flushes where honoured ([f50e8be35c6](https://github.com/nitroos-org/reactos/commit/f50e8be35c6))
+- AHCI channels issue 512 KB ATA commands to 48-bit LBA disks (PATA/ATAPI unchanged); NTFS-NG pure-growth appends take PagingIoResource shared and up to 4 paging write transfers of one stream overlap with the initialized size ... ([2f50dc84a74](https://github.com/nitroos-org/reactos/commit/2f50dc84a74))
+- NTFS-NG sets ARCHIVE on rename and on SetFileTime through a handle that wrote (as Windows 10, measured); STATUS_UNEXPECTED_IO_ERROR maps to ERROR_IO_DEVICE; a write-blocked NTFS-NG journal logs one event in Release builds ... ([623f23b85ad](https://github.com/nitroos-org/reactos/commit/623f23b85ad))
+- NTFS-NG keeps a compact stat of evicted inodes (direct-mapped by record number, voided when the inode is loaded again) so a directory listing does not re-read every file's record at low memory; 1 GB: dir_enum 1954 -> 88 ms ... ([db05dd62c5d](https://github.com/nitroos-org/reactos/commit/db05dd62c5d))
+- NTFS-NG retained journal transactions (a small durable commit stops at its COMMITTED header; its pages go in place at a later checkpoint, two slot areas alternate, freed clusters are not reused before the checkpoint ... ([307ad8bf3ca](https://github.com/nitroos-org/reactos/commit/307ad8bf3ca))
+- NTFS-NG keeps recent directory security descriptors (no device read per create), the lazy writer leaves dirty data younger than 3 s alone unless the cache is under pressure, and a cache map uninitialized to zero purges before ... ([74349a6ce7b](https://github.com/nitroos-org/reactos/commit/74349a6ce7b))
+- A section-view fault that cannot get a page for its page table returns STATUS_NO_MEMORY (MmHoldPageTable faults the paging levels in itself) so MmAccessFault drops the address-space lock, waits for the balancer and retries ... ([53a004d4e37](https://github.com/nitroos-org/reactos/commit/53a004d4e37))
+- Cc writes back in 1 MB requests of up to 4 adjacent views and starts write-behind as soon as a writer leaves much dirty data; NTFS-NG paging writes go to the device from the caller pages with every request of a transfer in ... ([3dec5f68428](https://github.com/nitroos-org/reactos/commit/3dec5f68428))
+- (part 1 of 2): NTFS-NG directory queries reject names from the literal ends of the expression (winsxs continuation query 0.54 -> 0.017 ms), the native side of a WoW64 process creates no activation context, the LCID index table is ... ([89cef7dafaa](https://github.com/nitroos-org/reactos/commit/89cef7dafaa))
+- Dirty cache data is paced by the lazy writer's progress past the dirty threshold instead of a clock tick from a quarter of it; NTFS-NG asks CcCanIWrite before taking its resources; 64-page flush clusters and a 256 KB write-back ... ([53d949b802f](https://github.com/nitroos-org/reactos/commit/53d949b802f))
+- NTFS-NG keeps what a directory listing and a small-file read need cached (unused inodes and idle FCBs scale with RAM, 4096/1024 min, 32768 max; FcbCacheMax still overrides), no view padding in the purge/flush range; 10k-entry ... ([bb0ba444588](https://github.com/nitroos-org/reactos/commit/bb0ba444588))
+- The loader records every unresolved driver import (debugger line, System event, HKLM\SYSTEM\...\NitroOS\MissingDriverImports); ObRegisterCallbacks/ObUnRegisterCallbacks/ObGetFilterVersion for process and thread handles (callbacks ... ([3803829c883](https://github.com/nitroos-org/reactos/commit/3803829c883))
+- Pager pacing slots by thread id with elapsed-time charging, writer stamp/count ordering (reader snapshots counts first), Want clamped on aging passes, exact /NITROPAGERDEBUG token, NTFS-NG takes the debug decision from the ... ([bab03062114](https://github.com/nitroos-org/reactos/commit/bab03062114))
+
+</details>
+
+<details><summary>Btrfs + other fs (3 fixes)</summary>
+
+- A cancelled listen IRP that a connect already took off the queue is not unlinked twice (0x139 at shutdown) ([7a86e6b758a](https://github.com/nitroos-org/reactos/commit/7a86e6b758a))
+- Btrfs allocates the disk space when SetEndOfFile grows a file (a full volume fails the call instead of losing mapped writes) ([036a438ee8d](https://github.com/nitroos-org/reactos/commit/036a438ee8d))
+- Ext2 no longer fails fast when two threads miss the same block (racing getblk unlinked an unlinked buffer head) ([d2276da0acc](https://github.com/nitroos-org/reactos/commit/d2276da0acc))
+
+</details>
+
+<details><summary>win32k/GDI/USER (69 fixes)</summary>
+
+- A desktop heap commits what DESKTOPINFO needs up front and never commits without a user mapping (creating many desktops in one process no longer fails; Debug builds bugchecked 0x50) ([52f73135ce7](https://github.com/nitroos-org/reactos/commit/52f73135ce7))
+- D3D11/D3D10 CreateDevice without an adapter returns the Windows codes for UNKNOWN, REFERENCE and SOFTWARE ([a7ee0df4745](https://github.com/nitroos-org/reactos/commit/a7ee0df4745))
+- D3D11/D3D10 devices of the WARP driver type are created on the WARP adapter like Windows ([50e6ff46f86](https://github.com/nitroos-org/reactos/commit/50e6ff46f86))
+- EngLineTo steps only the visible part of a line; a dashed pen whose segments sum to 2^32 no longer divides by zero in the kernel ([15fb9057fd0](https://github.com/nitroos-org/reactos/commit/15fb9057fd0))
+- Huge ellipse, arc, pie, chord and round rectangle boxes wrap their device coordinates to 28 bits like Windows instead of clamping ([494815ebcf5](https://github.com/nitroos-org/reactos/commit/494815ebcf5))
+- Framebuf copies changed rectangles to the frame buffer once per clock tick instead of after every drawing call (BitBlt to a window 12 -> 7.1 ms, ScrollWindowEx -42%) ([3b3d553ac25](https://github.com/nitroos-org/reactos/commit/3b3d553ac25))
+- Arc, Pie, Chord, Ellipse and RoundRect never divide by zero, overflow or stall on huge boxes; the work is proportional to the visible rows ([8f1fd735f36](https://github.com/nitroos-org/reactos/commit/8f1fd735f36))
+- Amd64 GDI transform matrices truncate like i386 and Windows; the world-to-device matrix is rebuilt only when the mapping changes; MM_ISOTROPIC with a zero viewport width like Windows ([62a190d98ab](https://github.com/nitroos-org/reactos/commit/62a190d98ab))
+- D2d1 compiles its shaders once per device, not per device context (Wine 3bb5938957f, 50c7c25cfa8): Word cold start compiles 168 shaders instead of 768 ([4e220aaf32b](https://github.com/nitroos-org/reactos/commit/4e220aaf32b))
+- Window redirection level 1: a burst of scrolls is presented once per frame and its end reaches the screen within two frames (ScrollWindowEx at L1 faster than L0) ([65c06523bba](https://github.com/nitroos-org/reactos/commit/65c06523bba))
+- Wide pens: Arc, Pie, Chord, Ellipse and RoundRect are stroked paths rotated with the world transform, as on Windows; path and region code safe at extreme coordinates ([cff3d913564](https://github.com/nitroos-org/reactos/commit/cff3d913564))
+- A repeated DwmExtendFrameIntoClientArea keeps the window's redirection surface (black first Firefox x86 frame at window-surfaces level 1) ([cf2c3b2604c](https://github.com/nitroos-org/reactos/commit/cf2c3b2604c))
+- Wined3d client threads block instead of spinning while the command-stream thread is busy (Word heavy cold start CPU halved) ([152624de716](https://github.com/nitroos-org/reactos/commit/152624de716))
+- Bezier flattening in 64-bit arithmetic (no kernel divide error for curves near the coordinate limits) ([7eea3e86764](https://github.com/nitroos-org/reactos/commit/7eea3e86764))
+- Amd64 coordinate transforms round to nearest like i386 and Windows (LPtoDP/DPtoLP no longer truncate) ([943d060a59a](https://github.com/nitroos-org/reactos/commit/943d060a59a))
+- Bezier flattening keeps its points when the buffer grows (no uninitialised pool memory in large curves) ([1676c9f5a1f](https://github.com/nitroos-org/reactos/commit/1676c9f5a1f))
+- A WIC bitmap render target keeps the bitmap's pixels it does not draw over, and its target bitmap is premultiplied (measured on Windows 10) ([9704ac4f853](https://github.com/nitroos-org/reactos/commit/9704ac4f853))
+- Mesa3D LLVM pack missing is loud (banner, renderer file) and an error with NITRO_REQUIRE_LLVM_PACKS ([b97a406903c](https://github.com/nitroos-org/reactos/commit/b97a406903c))
+- Wide pen widths under the DC transform for Arc, Pie, Chord, Ellipse, RoundRect, Rectangle, Polygon and stroked paths; arcs reverse under a flipping world transform ([df60e85898c](https://github.com/nitroos-org/reactos/commit/df60e85898c))
+- Mesa shader disk cache on Windows (llvmpipe/lavapipe packs 26.3.0-dc2): shaders compiled once per user, protected cache directories ([20cb411e10f](https://github.com/nitroos-org/reactos/commit/20cb411e10f))
+- A layered window that has had neither SetLayeredWindowAttributes nor UpdateLayeredWindow is not drawn ([4631d7e4b35](https://github.com/nitroos-org/reactos/commit/4631d7e4b35))
+- Direct2D CombineWithGeometry (union, intersect, xor, exclude) ([dfc1fe5a4a2](https://github.com/nitroos-org/reactos/commit/dfc1fe5a4a2))
+- Direct2D bitmaps that cannot draw keep a shader resource view when their texture can be sampled (Excel's formula bar, grid and tabs no longer black) ([b2f5f3c2480](https://github.com/nitroos-org/reactos/commit/b2f5f3c2480))
+- D3D11 reports pixel-shader stencil reference only at feature level 11_0 and above (fixes the d3d11 winetest crash in test_stencil_export) ([71d1a96b00b](https://github.com/nitroos-org/reactos/commit/71d1a96b00b))
+- TranslateCharsetInfo(TCI_SRCLOCALE) fails for an LCID Windows does not know (nl-SR and the other Wine-only locales), as measured on Windows 10 ([99038a9ac5d](https://github.com/nitroos-org/reactos/commit/99038a9ac5d))
+- Win32k bounds: MaskBlt mask origin and extent checked (engine and driver blits), RLE decoding never reads past the captured bits, GetDIBits never copies more than the caller's buffer holds (as measured on Windows 10) ([7891ca42f57](https://github.com/nitroos-org/reactos/commit/7891ca42f57))
+- TranslateCharsetInfo returns the locale's supported code pages in fsCsb[1] and knows the UTF-8 code page, as measured on Windows 10 ([bbb54efe139](https://github.com/nitroos-org/reactos/commit/bbb54efe139))
+- DwmSetWindowAttribute returns E_INVALIDARG for the border, caption and text colour attributes, as Windows 10 19045 does ([1a49de12d7d](https://github.com/nitroos-org/reactos/commit/1a49de12d7d))
+- Wide-pen Polyline/PolyPolyline/PolyBezier neither use nor move the current position and PolyBezierTo starts at it, as on Windows; pen width is in logical units under the mapping mode and world transform (elliptical pen for ... ([d0f86e700da](https://github.com/nitroos-org/reactos/commit/d0f86e700da))
+- Direct2D batches consecutive ellipses, rounded rectangles, paths and strokes with the same brush and transform into one draw per shape stream (FillEllipse x500 6.3x faster; images unchanged) ([6211cbd2737](https://github.com/nitroos-org/reactos/commit/6211cbd2737))
+- GDI arcs, pies, chords and ellipses draw the same pixels into a window and a memory DC (DC origin rounding, pie/chord brush origin, 45-degree dash axis) ([50a185c1dc6](https://github.com/nitroos-org/reactos/commit/50a185c1dc6))
+- GDI shapes under transforms: wide-pen Polygon no longer transformed twice, a rotated Rectangle reads a current world transform, flipped axes order the device corners; wide-pen Rectangle outline independent of the current position ([3bcf3621f3c](https://github.com/nitroos-org/reactos/commit/3bcf3621f3c))
+- Redirected window surfaces R4: each GDI primitive records the area it drew, up to 8 dirty rectangles per window, EndPaint presents only what was drawn, the frame timer no longer blocks on the USER lock (level 1 LibreOffice redraw ... ([06121702b1e](https://github.com/nitroos-org/reactos/commit/06121702b1e))
+- Direct2D draws SVG documents (paths with all commands, basic shapes, fill and opacity, viewBox and preserveAspectRatio) and command lists end their draw and play back on a device context ([e7f15b4ae66](https://github.com/nitroos-org/reactos/commit/e7f15b4ae66))
+- Redirected window surfaces level 2 follow-ups (64-bit window edge in the screen copy, budget check shared by both paths, layered history ends with WS_EX_LAYERED, no stale surface under a snapshot blend, desktop paint failure ... ([4001a531b3c](https://github.com/nitroos-org/reactos/commit/4001a531b3c))
+- Direct2D SVG documents (ID2D1SvgDocument / ID2D1SvgElement: empty document with a root svg element, element tree and attributes; drawing and parsing still stubs) ([0a73320ef02](https://github.com/nitroos-org/reactos/commit/0a73320ef02))
+- Redirected window surfaces stage R2 (NitroRedirection >= 2): layered and glass windows composed from their surfaces; source ranges clipped in 64-bit; levels 0/1 unchanged ([fa14a2dae77](https://github.com/nitroos-org/reactos/commit/fa14a2dae77))
+- Uxtheme DrawThemeParentBackgroundEx (WinDirStat's drive list was empty: the stub raised during dialog paint) ([9e58fb77c93](https://github.com/nitroos-org/reactos/commit/9e58fb77c93))
+- An ended session's desktop windows go after CSRSS's last thread's own windows; surviving clients fail cleanly instead of using them; window-station delete closes under the USER lock ([64579f0bbfb](https://github.com/nitroos-org/reactos/commit/64579f0bbfb))
+- A session's win32k tears down cleanly: the raw input thread ends when CSRSS is terminated, the desktop windows stay until CSRSS has no thread left ([dc15e2a50b1](https://github.com/nitroos-org/reactos/commit/dc15e2a50b1))
+- WH_FOREGROUNDIDLE runs only when a thread really waits, not on every empty PeekMessage (SWT/Eclipse apps no longer spin at the splash), and LpkGetCharacterPlacement no longer reads past the caller's arrays ([7710c4da319](https://github.com/nitroos-org/reactos/commit/7710c4da319))
+- Window station creation checks where the object landed, creates the switch event only after a successful insert, and never touches the new object when the name already existed (sessions) ([0a6d72171c4](https://github.com/nitroos-org/reactos/commit/0a6d72171c4))
+- SetWindowPos/MoveWindow, WM_HELP, EDIT WM_UNDO and WM_MDICREATE leave the thread's last error as Windows does ([25438d769d4](https://github.com/nitroos-org/reactos/commit/25438d769d4))
+- Sizing a window whose WM_GETMINMAXINFO says 'no maximum' (Chromium, Electron) no longer overflows into a MAXLONG-sized rectangle ([669b0f6d8ef](https://github.com/nitroos-org/reactos/commit/669b0f6d8ef))
+- DirectWrite system fallback ends the symbol, punctuation and currency ranges with Lucida Console (DejaVu Sans Mono based), so Chrome's Tab-key hint (U+21E5) no longer draws as a box ([c436c3da74f](https://github.com/nitroos-org/reactos/commit/c436c3da74f))
+- Sessions P3b piece 2: a second session with its own win32k (NitroSessions 5, off by default); window stations and desktops are used only from their own session ([8f5e594c925](https://github.com/nitroos-org/reactos/commit/8f5e594c925))
+- Direct2D draws held-back solid fills together, wined3d sends only the state that changed on a context-state swap, and DirectWrite builds a font's character map once under a lock (fixes an occasional crash) ([5e404ec4cf5](https://github.com/nitroos-org/reactos/commit/5e404ec4cf5))
+- Frame controls keep their Marlett fonts, font realization caches face names, the edit control looks lines up in an array, measured glyph advances are kept (window create/show/destroy 4.8x, edit scroll 5-10x faster) ... ([8f83d445021](https://github.com/nitroos-org/reactos/commit/8f83d445021))
+- An owner deleting its DC or region takes the object's lock and gives the user attribute back in its own context ([d3ef2259b02](https://github.com/nitroos-org/reactos/commit/d3ef2259b02))
+- A redirected DC holds a reference on its window's redirection record (no orphan reaper) ([86525d11cf4](https://github.com/nitroos-org/reactos/commit/86525d11cf4))
+- DeleteDC of a window DC runs under the USER lock (the DCE list was changed without it); an owner frees a DC's attribute in its own context when another process held it ([232db1f845a](https://github.com/nitroos-org/reactos/commit/232db1f845a))
+- StretchBlt SRCCOPY into 32 bpp with precomputed source columns (40-90x faster); text output hashes the glyph cache and reuses one glyph mask surface per string ([4b524fe4497](https://github.com/nitroos-org/reactos/commit/4b524fe4497))
+- FreeType mono renderer no longer leaks its worker and pool on early returns (DirectWrite out-of-memory crash; also used by win32k); DirectWrite caches glyphs at sub-pixel positions (DrawText about 23x faster) ([6a803ddc5dc](https://github.com/nitroos-org/reactos/commit/6a803ddc5dc))
+- A GDI object deleted while another thread holds it is freed by that thread in its owner's context; a lock re-checks owner and validity after waiting (fixes the destroy-while-drawing bugcheck) ([67f35d967cc](https://github.com/nitroos-org/reactos/commit/67f35d967cc))
+- D3D11 shared resources across processes (legacy and NT handles, IDXGIKeyedMutex); opened section headers validated ([7c984af18ee](https://github.com/nitroos-org/reactos/commit/7c984af18ee))
+- GDI batch, font buffer, request size and Eng entry point input checks; gdi32 ANSI extended font conversion ([f56490b0f9c](https://github.com/nitroos-org/reactos/commit/f56490b0f9c))
+- User32 EDIT, COMBOBOX and MDICLIENT leave the caller's last error alone as on Windows ([6a6e212f2c9](https://github.com/nitroos-org/reactos/commit/6a6e212f2c9))
+- User32 STATIC sets its FNID once (WM_NCCREATE) and sends no STN_ENABLE/DISABLE without a parent; EnableWindow/SetWindowLong leave the last error untouched as on Windows ([3bf6ba8b901](https://github.com/nitroos-org/reactos/commit/3bf6ba8b901))
+- GdiSwapBuffers/SetPixelFormat no longer take the USER lock under a DC lock (session deadlock); redirection owner check, frame-timer budget, StretchDIBits hazard, PrintWindow rect, ExtFloodFill rect ([a79e6a5fbe4](https://github.com/nitroos-org/reactos/commit/a79e6a5fbe4))
+- Mesa 26.3.0 GPU pack (llvmpipe, lavapipe, softpipe; LLVM 19.1.7), with the upstream llvmpipe indirect GS input fix ([5026f1d20c3](https://github.com/nitroos-org/reactos/commit/5026f1d20c3))
+- A held CS_OWNDC/CS_CLASSDC DC draws the whole window again after a paint (clip region dropped before the visible region is restored) ([2b5e344c65f](https://github.com/nitroos-org/reactos/commit/2b5e344c65f))
+- Redirected window surfaces stage R1 (NitroRedirection >= 1) ([734f0a8a6e9](https://github.com/nitroos-org/reactos/commit/734f0a8a6e9))
+- Redirected window surfaces stage R0 (NitroRedirection, default 0) ([9f249a661d1](https://github.com/nitroos-org/reactos/commit/9f249a661d1))
+- Direct2D built-in effects rendering ([2e082dbd99c](https://github.com/nitroos-org/reactos/commit/2e082dbd99c))
+- Wined3d GLSL selects a geometry shader input vertex chosen at run time with constant indices (llvmpipe's GS JIT reads out of bounds for shader_in[expr]); Chromium/VS Code GPU process crash 7/20 -> 0/20 ([3b1ee2d30b6](https://github.com/nitroos-org/reactos/commit/3b1ee2d30b6))
+- User32 fails a cross-process WM_COPYDATA with an unreadable parameter as Windows does (no sender crash); in-context WinEvent hooks load the hook DLL in the target by path (never into system, csrss, protected or other-session ... ([480ddcb9ee3](https://github.com/nitroos-org/reactos/commit/480ddcb9ee3))
+- D2d1 registers every built-in effect (as creatable stubs), accepts stock/source/compute transform nodes, and ID2D1Effect::SetInput(NULL) clears the input; Word's NetUI windows now create swap chains and paint (splash, backstage ... ([ab11aa58b56](https://github.com/nitroos-org/reactos/commit/ab11aa58b56))
+- Security fix (described generically): hardening in this area; details withheld until users have had time to update ([3105fa30ff6](https://github.com/nitroos-org/reactos/commit/3105fa30ff6))
+- Win32k font queries fail cleanly when the DC font handle names no font (no ASSERT/NULL use), the realization stays locked while its font is read, charset info returns DEFAULT_CHARSET with a cleared signature and unlocks the DC on ... ([2587a5813eb](https://github.com/nitroos-org/reactos/commit/2587a5813eb))
+
+</details>
+
+<details><summary>Console/csrss (8 fixes)</summary>
+
+- SetConsoleOutputCP(CP_UTF8) works again (dotnet SDK crashed since TranslateCharsetInfo learned UTF-8) ([d1c5d463067](https://github.com/nitroos-org/reactos/commit/d1c5d463067))
+- Csrss serves the requests of a thread it was not told about (thread-pool and RtlCreateUserThread threads calling CreateThread; Word no longer aborts after its splash) ([cb4b6977b00](https://github.com/nitroos-org/reactos/commit/cb4b6977b00))
+- Consrv frees a deleted console and its frontend block (csrss grew ~760 B per console child), with a lookup count so a console being validated is never freed under it ([3a73841a116](https://github.com/nitroos-org/reactos/commit/3a73841a116))
+- ConsoleCtrlEventRace checks that an unpaced burst of Ctrl+Break is delivered completely and one handler at a time, as on Windows ([bd88ade9e02](https://github.com/nitroos-org/reactos/commit/bd88ade9e02))
+- The console input thread leaves its desktop before closing it (csrss no longer keeps a desktop handle per console), and a console is handed an input thread that stays until its window exists ([f5d651feafa](https://github.com/nitroos-org/reactos/commit/f5d651feafa))
+- A failed thread insert gives back the process reference it took, so csrss no longer keeps handles of exited processes ([4c2ab8ff447](https://github.com/nitroos-org/reactos/commit/4c2ab8ff447))
+- Basesrv registers a new thread only under the ids of the handle it was given, fetched once; csrsrv releases only what it took when a thread insert fails ([653a737898b](https://github.com/nitroos-org/reactos/commit/653a737898b))
+- Basesrv takes process and thread ids from the handles and registers only the caller's child; csrss's Sb port serves only the session manager that started it ([b918ee0f992](https://github.com/nitroos-org/reactos/commit/b918ee0f992))
+
+</details>
+
+<details><summary>WoW64 (12 fixes)</summary>
+
+- WoW64 thunks NtCreateProcess(Ex); 32-bit threads get the NT6 all-access mask ([b77759c6904](https://github.com/nitroos-org/reactos/commit/b77759c6904))
+- Reported handle access without the internal protect-close bit, WoW64 object types table, invariant font signature and LCIDToLocaleName(0x1000) as on Windows 10 ([f7015e4f8dd](https://github.com/nitroos-org/reactos/commit/f7015e4f8dd))
+- WoW64 thunks for NtQueryMultipleValueKey, NtCompactKeys, NtQueryOpenSubKeysEx, NtInitializeRegistry and NtLockProductActivationKeys ([4d4cdee584b](https://github.com/nitroos-org/reactos/commit/4d4cdee584b))
+- NTLM without an external helper (NTLMv2 exchange and session security in secur32, response check in msv1_0, WoW64 thunks), RPC_C_AUTHN_WINNT for rpcrt4 clients and servers; network logons to blank-password accounts refused unless ... ([563181241cd](https://github.com/nitroos-org/reactos/commit/563181241cd))
+- ICU data lists the locales the NLS gained (335 names, every one resolves); RtlLcidToLocaleName honours AllocateDestinationString (the x64 / WoW64 locale winetest no longer crashes) ([dddc1fa34de](https://github.com/nitroos-org/reactos/commit/dddc1fa34de))
+- A 32-bit debugger can launch a 32-bit child under WoW64 (the native layer's debug print exceptions are continued, not left unhandled: the child no longer exits 0x40010006) ([35ba3032b45](https://github.com/nitroos-org/reactos/commit/35ba3032b45))
+- Wow64ThreadSegments apitest (segment registers of 64-bit and WoW64 threads created and joined in a loop); verified clean on Intel P/E cores ([ed332ca1742](https://github.com/nitroos-org/reactos/commit/ed332ca1742))
+- Ntdll_apitest FaultContext checks the exception record and context of concurrent faults exactly (x64 and WoW64) ([a85cbb86d35](https://github.com/nitroos-org/reactos/commit/a85cbb86d35))
+- 32-bit processes get WM_NEXTMENU, the drag family, IME, WM_COPYGLOBALDATA and DDE messages translated under WoW64 ([af9a4988e19](https://github.com/nitroos-org/reactos/commit/af9a4988e19))
+- WoW64 translates WM_HELP's HELPINFO both ways and passes owner-draw, MDI create, menu object and combo box info pointers for synchronous same-process sends ([e38c531248c](https://github.com/nitroos-org/reactos/commit/e38c531248c))
+- WoW64 passes WM_GETDLGCODE, WM_NEXTDLGCTL, WM_PARENTNOTIFY and pointer messages with a NULL lParam instead of failing them (32-bit dialogs with scroll bars) ([ab002249c02](https://github.com/nitroos-org/reactos/commit/ab002249c02))
+- The application compatibility cache is filled (basesrv inserts images the shim database has nothing for, checked by handle identity on local disks; layered or shimmed images never), keyed by NT path with size/time invalidation ... ([42c85b7aab3](https://github.com/nitroos-org/reactos/commit/42c85b7aab3))
+
+</details>
+
+<details><summary>Networking (115 fixes)</summary>
+
+- Setup and the first start of an upgraded install no longer wait for the service manager when the network components are installed (about 2 minutes saved per install) ([ae33cd4badf](https://github.com/nitroos-org/reactos/commit/ae33cd4badf))
+- The TCP/IPv6 component and its network connection properties page ([5d8e9bdc395](https://github.com/nitroos-org/reactos/commit/5d8e9bdc395))
+- DHCP client: with two adapters the service no longer counts an empty read as an error or reads a freed protocol (service crash) ([d11a708ce1a](https://github.com/nitroos-org/reactos/commit/d11a708ce1a))
+- Security fix (described generically): hardening in this area; details withheld until users have had time to update ([04cb829e62f](https://github.com/nitroos-org/reactos/commit/04cb829e62f))
+- Getsockname of an IPv6 TCP connection never holds the connection lock and the core lock together (deadlock with a link-local peer) ([56780be7fc1](https://github.com/nitroos-org/reactos/commit/56780be7fc1))
+- Raw IPv6: an IPV6_HDRINCL source that is not on this machine is routed by the destination ([00e2f1e88f9](https://github.com/nitroos-org/reactos/commit/00e2f1e88f9))
+- IPv4 multicast: IP_ADD_MEMBERSHIP reaches the stack, IPv4 groups are put in the adapter's multicast list ([19db4da0d57](https://github.com/nitroos-org/reactos/commit/19db4da0d57))
+- IPv6 loopback-only follow-ups: PS module error text, sortpairs note, WSAENETUNREACH regression test ([2af18a24717](https://github.com/nitroos-org/reactos/commit/2af18a24717))
+- DHCP client fixes: DISCOVER from 0.0.0.0 without a lease, earlier runs' automatic private and alternate addresses replaced cleanly, IpReleaseAddress/IpRenewAddress adapter name ([a1efe32e8fd](https://github.com/nitroos-org/reactos/commit/a1efe32e8fd))
+- Raw IPv6 follow-ups: a privileged IPV6_HDRINCL sends any source address as Windows does, interlocked ICMP rate window ([dd8987b06d8](https://github.com/nitroos-org/reactos/commit/dd8987b06d8))
+- DNS canonical names: A and AAAA answers carry the CNAME chain, cache keyed on the asked name and type, getaddrinfo takes the canonical name from the answer ([1045d916cb6](https://github.com/nitroos-org/reactos/commit/1045d916cb6))
+- Security fix (described generically): hardening in this area; details withheld until users have had time to update ([b639e85215e](https://github.com/nitroos-org/reactos/commit/b639e85215e))
+- Firewall report follow-ups: unpaired Platform2 stays unpaired, broad Block rules of every protocol counted, event ids by severity and an event when clean again ([5de26e6f145](https://github.com/nitroos-org/reactos/commit/5de26e6f145))
+- IPv6 source address selection by RFC 6724 rules 1, 2, 3, 6, 7 and 8 with the prefix policy table, one function for the stack and user mode ([125f857ba85](https://github.com/nitroos-org/reactos/commit/125f857ba85))
+- Raw IPv6 sockets with the Windows access rule, UDP port unreachable as WSAECONNRESET for both families, IPv6 UDP up to 65527 bytes, IPv6 option answers ([701124aa7e8](https://github.com/nitroos-org/reactos/commit/701124aa7e8))
+- FD_CONNECT is posted before FD_WRITE after a connect ([93a6ae9b779](https://github.com/nitroos-org/reactos/commit/93a6ae9b779))
+- DNS client cache follow-ups: flush on network change, full displaydns listing, 9701 for cache-only misses, seeded hash, 64-bit clock, whole owner names ([4f2e33ebf8b](https://github.com/nitroos-org/reactos/commit/4f2e33ebf8b))
+- Firewall rule push: honour a rule's Platform list, count and log Block rules that block all traffic of their direction ([003787ef341](https://github.com/nitroos-org/reactos/commit/003787ef341))
+- Ipv6Enable = 0 as DisabledComponents 0xFF: IPv6 off on the adapters, loopback and AF_INET6 sockets kept ([e2469473fda](https://github.com/nitroos-org/reactos/commit/e2469473fda))
+- Fixes: NetWkstaUserEnum no longer crashes wkssvc or leaks, one buffer per call; widl marshals nested counted strings correctly on 32-bit ([47cb39ce267](https://github.com/nitroos-org/reactos/commit/47cb39ce267))
+- The DHCP client automatic private address fix: keep one address across service restarts ([e90a673bef1](https://github.com/nitroos-org/reactos/commit/e90a673bef1))
+- LsaQueryInformationPolicy and netapi32 info calls return one freeable block (no per-call leak) ([e0a76afb28c](https://github.com/nitroos-org/reactos/commit/e0a76afb28c))
+- IPv4 and IPv6 change notifications kept apart like Windows; ResolveIpNetEntry2 solicits IPv6 neighbours with NS only ([537786dceae](https://github.com/nitroos-org/reactos/commit/537786dceae))
+- The DHCP client service starts cleanly after a stop and start; its RPC interface stays registered while other netsvcs services stop ([26a404d4151](https://github.com/nitroos-org/reactos/commit/26a404d4151))
+- IPv6 configuration API validates fields like Windows, serialises persistent-store writes, edits full stores ([51fe903b4c1](https://github.com/nitroos-org/reactos/commit/51fe903b4c1))
+- No heap left behind per WSAStartup/WSACleanup, per socket or per DNS query ([74831ce5cc1](https://github.com/nitroos-org/reactos/commit/74831ce5cc1))
+- Netsh interface ipv6|ipv4 set interface, ipv6 set privacy and add/set/delete prefixpolicy; ifmon in SysWOW64 ([7a7e50d790a](https://github.com/nitroos-org/reactos/commit/7a7e50d790a))
+- Dnsapi keeps the IPv6 name servers and search domains between queries until an address change ([5267c2e1535](https://github.com/nitroos-org/reactos/commit/5267c2e1535))
+- Stateful DHCPv6 client: IA_NA address, renew/rebind/release/decline/confirm, ipconfig /renew6 and /release6 ([437c28bcdca](https://github.com/nitroos-org/reactos/commit/437c28bcdca))
+- The DNS client cache honours record TTLs, keeps negative answers, is bounded and hashed ([b8474470a28](https://github.com/nitroos-org/reactos/commit/b8474470a28))
+- 16 IPv6 address slots per interface; temporary addresses keep a reserve and give way to stable, configured and DHCPv6 addresses ([df13571476c](https://github.com/nitroos-org/reactos/commit/df13571476c))
+- UDP datagrams that arrive while a receive completes are held instead of dropped; multicast join/leave without an interface index ([1c820cd903b](https://github.com/nitroos-org/reactos/commit/1c820cd903b))
+- SetIpInterfaceEntry for IPv4 and IPv6 (MTU, metric, router discovery, DAD transmits; active and persistent) and Set-NetIPInterface ([1063eb9f8d7](https://github.com/nitroos-org/reactos/commit/1063eb9f8d7))
+- IPv6 temporary addresses (RFC 8981) with source address rule 7, on by default as in Windows 10 ([4011dfb21eb](https://github.com/nitroos-org/reactos/commit/4011dfb21eb))
+- WinINet retries a failed TLS handshake through the proxy with a new CONNECT (and a new NTLM/Negotiate proxy login) instead of the unresolved target ([8f56fda8802](https://github.com/nitroos-org/reactos/commit/8f56fda8802))
+- Select() returns when a polled socket is closed meanwhile; select and WSAEventSelect results and errors as Windows ([02ff7e8d510](https://github.com/nitroos-org/reactos/commit/02ff7e8d510))
+- Honour Tcpip6 DisabledComponents: 0x10/0xFF leave IPv6 on the loopback only, 0x20 prefers IPv4 ([7b031bf3a98](https://github.com/nitroos-org/reactos/commit/7b031bf3a98))
+- IPv6 write side of route and netsh interface ipv6: add, set and delete addresses, routes and DNS servers, active and persistent ([e47f9c93213](https://github.com/nitroos-org/reactos/commit/e47f9c93213))
+- IPv6 DNS and getaddrinfo apitests tell a machine without a network adapter or Internet name server from a defect ([267f2b34729](https://github.com/nitroos-org/reactos/commit/267f2b34729))
+- Stable IPv6 identifier secret: no zeros on RDRAND failure, strict key DACL, a secret made during setup replaced at the first normal boot ([bf6746eac29](https://github.com/nitroos-org/reactos/commit/bf6746eac29))
+- DnsQuery answers CNAME, NS, SOA, MX, TXT and SRV; nslookup prints them; no binding leak per query ([8e99e37e3c4](https://github.com/nitroos-org/reactos/commit/8e99e37e3c4))
+- WinHTTP and WinINet IPv6 follow-ups: bracketed non-IPv6 hosts fail 12005, <local> and Host header rules for IPv6 literals, WinINet connect timeout per address ([494c39d41ae](https://github.com/nitroos-org/reactos/commit/494c39d41ae))
+- RFC 6724 destination ordering with the Windows prefix policy table: CreateSortedAddressPairs, getaddrinfo, SIO_ADDRESS_LIST_SORT ([477d972e718](https://github.com/nitroos-org/reactos/commit/477d972e718))
+- Reverse lookup of IPv6 addresses (ip6.arpa), hosts-file reverse rows; adns ends on compression pointer cycles and on truncated TCP answers ([048bfa5942c](https://github.com/nitroos-org/reactos/commit/048bfa5942c))
+- IPv6 duplicate address detection conflicts reported like Windows ([2500c8d1e8e](https://github.com/nitroos-org/reactos/commit/2500c8d1e8e))
+- Stateless DHCPv6 client: DNS servers and search list on the O flag, DUID and IAID, dhcpcsvc6.dll ([e2620850972](https://github.com/nitroos-org/reactos/commit/e2620850972))
+- IPv6 in route print, netsh interface ipv6 show and a new pathping ([f047b65f496](https://github.com/nitroos-org/reactos/commit/f047b65f496))
+- IPv6 router advertisement extras: DNS search lists, route information and router preference, hop limit, M/O flags, deprecation, larger neighbour tables ([f501b829af8](https://github.com/nitroos-org/reactos/commit/f501b829af8))
+- A listener admits no more connections than its backlog; a thread in accept() is released (WSAEINTR, as Windows) when its listening socket is closed; a send cancelled before it was queued completes for its caller ([8acd77f76f5](https://github.com/nitroos-org/reactos/commit/8acd77f76f5))
+- Names in the hosts file resolve as on Windows: every name and row of a line, edits seen without a reboot, hosts rows shadow DNS, a hosts name is not asked from a DNS server ([3c6df91bfc9](https://github.com/nitroos-org/reactos/commit/3c6df91bfc9))
+- The port proxy relays v4tov6, v6tov4 and v6tov6 as well as v4tov4 ([2856b616794](https://github.com/nitroos-org/reactos/commit/2856b616794))
+- PowerShell NetTCPIP / DnsClient cmdlets handle IPv6 (addresses, routes, DNS servers, persistence, Test-NetConnection details) ([676a445aca9](https://github.com/nitroos-org/reactos/commit/676a445aca9))
+- WinHTTP and WinINet connect to IPv6 literal URLs ([addr], zone ids) and fall back to the next resolved address; a bracketed host is an IPv6 address only ([50999099ef8](https://github.com/nitroos-org/reactos/commit/50999099ef8))
+- ICMPv6 echo request rules (File and Printer Sharing, Core Networking Diagnostics) in the default firewall policy, added once to existing installs ([6983396bd92](https://github.com/nitroos-org/reactos/commit/6983396bd92))
+- IPv6 configuration: a kernel IPv6 route table, static and persistent IPv6 addresses and routes, and the IP Helper create/set/delete calls for IPv6 ([b49952803ca](https://github.com/nitroos-org/reactos/commit/b49952803ca))
+- IPv6 MLD listener reports (solicited-node and socket groups) without an idle wake-up, so multicast-snooping switches keep delivering neighbour discovery and group traffic ([e171b52a579](https://github.com/nitroos-org/reactos/commit/e171b52a579))
+- Name lookups return every address of a name with several A records (gethostbyname, getaddrinfo, DnsQuery, WSALookupService), results over 512 bytes are retried with the size needed; nslookup prints every address ([737067c2585](https://github.com/nitroos-org/reactos/commit/737067c2585))
+- IPv6 in the IP Helper tables: neighbours, routes, best route, TCP6 table, statistics and change notifications answer for IPv6 (and the IPv4 *Table2 calls work) ([962cb4804fc](https://github.com/nitroos-org/reactos/commit/962cb4804fc))
+- The network list reports IPv6 connectivity (an IPv6-only host is connected, with IPv6 Internet behind a router) ([875f950976e](https://github.com/nitroos-org/reactos/commit/875f950976e))
+- IPv6 is on by default (Tcpip\Parameters\Ipv6Enable = 0 turns it off), after the full gate and a clean soak ([a168611150c](https://github.com/nitroos-org/reactos/commit/a168611150c))
+- IPv6 link-local and SLAAC addresses use stable random interface identifiers (RFC 7217) instead of the MAC, as Windows does; Tcpip6 RandomizeIdentifiers=0 restores EUI-64 ([80c6231bbc3](https://github.com/nitroos-org/reactos/commit/80c6231bbc3))
+- DnsQuery_A/UTF8 convert every record type by deep copy and free the wide result (no leak, no wrong-size allocation); 32-bit clients get local data lengths; nslookup reads only inside the received packet ([8bc86d0c743](https://github.com/nitroos-org/reactos/commit/8bc86d0c743))
+- Pcnet initialises its adapter lock before the interrupt is registered (bugcheck 0x10 when the first interrupt's DPC ran on another processor) ([86176d29264](https://github.com/nitroos-org/reactos/commit/86176d29264))
+- Ws2_32 getaddrinfo test expects ::1 first for localhost when IPv6 sockets are on, as Windows answers ([be7e8974a65](https://github.com/nitroos-org/reactos/commit/be7e8974a65))
+- Firewall Allow rules with a condition the kernel cannot match (service, services only, connection security, authorised users or machines, owner, package, interface) are rejected and reported instead of pushed broader ([f77d941f2da](https://github.com/nitroos-org/reactos/commit/f77d941f2da))
+- The IPv6 catalog upgrade tells the MSAFD entries apart by family and protocol; ipv6tcp fails fast without IPv6 catalog entries ([4d7c17e690e](https://github.com/nitroos-org/reactos/commit/4d7c17e690e))
+- DNS over TCP fallback sends the query, not uninitialised stack bytes; adns retries at the server that truncated and skips failing ones; dnsapi and nslookup bound what they read and write ([250d0d3a35f](https://github.com/nitroos-org/reactos/commit/250d0d3a35f))
+- AddIPAddress adds an address beside the primary one instead of replacing it; DeleteIPAddress, the unicast row API and the TCP/IP property sheet handle several addresses per interface ([4ed2061c1d2](https://github.com/nitroos-org/reactos/commit/4ed2061c1d2))
+- IPv6 M2 follow-ups: ICMPv6 echo cap and bucketed match, WoW64 async echo alignment, TCP tables list every connection end (fixes a tcpip crash under table queries during connection churn) ([3ccf2a488c2](https://github.com/nitroos-org/reactos/commit/3ccf2a488c2))
+- Firewall rule push: long lists split instead of truncated, strict address/prefix/ICMP parsing, per-family scope, Block rules first, unresolvable rules rejected and reported, policy pushed again when the host's addresses change ([50699ddbd82](https://github.com/nitroos-org/reactos/commit/50699ddbd82))
+- IPv6 default-ON prerequisites: unicast check for miniports whose multicast list overwrites the station address; existing installs get the IPv6 transport and catalog entries at logon ([a39e5dd3489](https://github.com/nitroos-org/reactos/commit/a39e5dd3489))
+- DNS over IPv6 servers (router advertisement RDNSS and static) and AAAA lookups while the IPv6 switch is on ([54ddc0dc6b3](https://github.com/nitroos-org/reactos/commit/54ddc0dc6b3))
+- ICMPv6 echo (ping -6), ipconfig and netstat IPv6 output, SIO_ADDRESS_LIST_QUERY for IPv6 sockets (with the IPv6 switch on) ([0ff5adda6c2](https://github.com/nitroos-org/reactos/commit/0ff5adda6c2))
+- IPv6 UDP sockets end to end while the IPv6 switch is on (off by default): checksums, multicast, packet info and hop limit, UDP6 tables ([c0d1a8089aa](https://github.com/nitroos-org/reactos/commit/c0d1a8089aa))
+- The IPv6 multicast list survives an adapter reset (retried at reset end and on a tick, bounded, then all multicast); e1000 receive address write order; IPv6 MTU follows a link MTU increase ([fd2941a0ddd](https://github.com/nitroos-org/reactos/commit/fd2941a0ddd))
+- Network pool leaks: AFD frees unread datagrams on close, tcpip and NDIS free what an adapter unbind left behind ([71c5d11530e](https://github.com/nitroos-org/reactos/commit/71c5d11530e))
+- IPv6 Winsock follow-ups (a denied impersonating thread does not pin the process to IPv6 off; catalog refusal order; IPV6_DONTFRAG) ([10c25034321](https://github.com/nitroos-org/reactos/commit/10c25034321))
+- IPv6 follow-ups: the firewall prompt sees IPv6 and dual-stack listeners, a Packet Too Big never raises the path MTU, the Winsock helper asks again after a failed IPv6 query ([eed027ac7e6](https://github.com/nitroos-org/reactos/commit/eed027ac7e6))
+- IPv6 TCP sockets end to end while the IPv6 switch is on (off by default); fragment reassembly takes the protocol of the first fragment ([b3e813127ac](https://github.com/nitroos-org/reactos/commit/b3e813127ac))
+- IPv6 firewall follow-ups (the rule service asks the running tcpip about IPv6; fragmented ND/MLD and nested Fragment headers dropped; echo replies judged) ([e7c0edb668b](https://github.com/nitroos-org/reactos/commit/e7c0edb668b))
+- IPv6 reporting follow-ups (canonical name without a ::1 entry, GetAdaptersAddresses size for large answers, table query entity check) ([7a5724fbd62](https://github.com/nitroos-org/reactos/commit/7a5724fbd62))
+- Fragmented TCP segments are answered again (IPv4 reassembly hands lwIP a whole datagram; a TCP header split across fragments is joined) ([f87c84dd841](https://github.com/nitroos-org/reactos/commit/f87c84dd841))
+- IPv6 inbound firewall subset (unsolicited SYN, UDP and ICMPv6 judged by the rules; ND/MLD checks; ICMPv6 error rate limit) while the IPv6 switch is on (off by default) ([22ea808f760](https://github.com/nitroos-org/reactos/commit/22ea808f760))
+- Iphlpapi and getaddrinfo report IPv6 addresses and interfaces while the IPv6 switch is on (off by default) ([d29ce27c106](https://github.com/nitroos-org/reactos/commit/d29ce27c106))
+- IPv6 receives its multicast groups (all-nodes, solicited-node) with the switch on; e1000, rtl8139 and pcnet program multicast lists correctly ([ccf8048e64c](https://github.com/nitroos-org/reactos/commit/ccf8048e64c))
+- AFD allocates the send window only for a send on a connected socket (a send before the connect no longer trips the connect) ([f45e90a0f1d](https://github.com/nitroos-org/reactos/commit/f45e90a0f1d))
+- IPv6 in tcpip behind Tcpip\Parameters\Ipv6Enable (default off): lwIP IPv6, link-local with DAD, ::1, IPv6 receive, no inbound wire connections yet ([95a273a8275](https://github.com/nitroos-org/reactos/commit/95a273a8275))
+- Legacy firewall objects (INetFwMgr, authorized applications, open ports) make real rules; advfirewall export, import, dump, set global; netsh fixes ([591d640f458](https://github.com/nitroos-org/reactos/commit/591d640f458))
+- Loopback TCP throughput (lwIP block reuse, nonpaged AFD receive windows within a quota and a global budget, I/O completion unlocks only locked MDLs, loopback ACK) ([127e2792f62](https://github.com/nitroos-org/reactos/commit/127e2792f62))
+- Getaddrinfo answers ::1 for "localhost" with AF_INET6, as Windows 10 does (AF_UNSPEC unchanged, IPv4 only) ([a6bcd65802f](https://github.com/nitroos-org/reactos/commit/a6bcd65802f))
+- An IRP completed by its own thread at PASSIVE_LEVEL runs its completion inline instead of through a self-IPI APC; AFD captures small ioctl inputs without an MDL; MSAFD reads the send window once per process (loopback ... ([068768953fe](https://github.com/nitroos-org/reactos/commit/068768953fe))
+- Getaddrinfo answers :: (passive) or ::1 for AF_INET6 without a node name, as Windows 10 does, so servers with an optional IPv6 wildcard bind (Redis default config) start on IPv4 ([f22bf675668](https://github.com/nitroos-org/reactos/commit/f22bf675668))
+- NetUserEnum, NetGroupEnum and NetLocalGroupEnum return all entries in one buffer, page by prefmaxlen with resume handles, and NetGroupGetUsers no longer reads past the member list on a resumed call ([6d737a7ef13](https://github.com/nitroos-org/reactos/commit/6d737a7ef13))
+- Net start passes the arguments typed after the service name, not the name itself (Oracle's TNS listener service starts) ([ff156ef05e0](https://github.com/nitroos-org/reactos/commit/ff156ef05e0))
+- TCP tables list TIME_WAIT connections; ApiInformation uses an expanded DllPath only when it fits; vectored handler walk ordering documented; FaultContext suspender runs above the faulting threads ([7fe059e7042](https://github.com/nitroos-org/reactos/commit/7fe059e7042))
+- Loopback TCP connect/accept/close 20% cheaper (lwIP requests run on the calling thread under the core lock; msafd stops asking AFD for a stream socket's receive window) ([2c37786394d](https://github.com/nitroos-org/reactos/commit/2c37786394d))
+- LwIP 2.2.1 (official release, 3-way merge keeping every local change) ([953e589c4f4](https://github.com/nitroos-org/reactos/commit/953e589c4f4))
+- Tcpip measures a lent receive packet from its buffers (stale cached length dropped TCP segments), and dc21x4 recalculates its packet counts after resizing ([b81187fdbad](https://github.com/nitroos-org/reactos/commit/b81187fdbad))
+- WSASend with a completion routine ignores the OVERLAPPED event field, and recv on an unconnected stream socket is WSAENOTCONN, as on Windows (Oracle XE listener answers over TCP) ([2a761851bdb](https://github.com/nitroos-org/reactos/commit/2a761851bdb))
+- Rtl8139 restarts sends, keeps interrupt bits and completes sends when the chip is done; dc21x4 copies received frames (both usable again: 18-33 MB/s on QEMU instead of stalls) ([599689d4dab](https://github.com/nitroos-org/reactos/commit/599689d4dab))
+- An outgoing connect picks an ephemeral port per remote, so ports in TIME-WAIT towards one remote are reused for others as on Windows; a full range gives WSAEADDRINUSE ([7a9470ac8ac](https://github.com/nitroos-org/reactos/commit/7a9470ac8ac))
+- MSI password edits are masked; iphlpapi gains the Vista mask-length, TCP table 2 and unicast-address exports; wsnmp32.dll (Wine 11.21) is added (Oracle XE 21c setup now installs its software) ([fd4a8aeb4f0](https://github.com/nitroos-org/reactos/commit/fd4a8aeb4f0))
+- TDI completions run without a thread wake on the lock-free loopback worker and in batches elsewhere; AFD send window 64 KB as on Windows; lowering SO_RCVBUF no longer cuts the window below data in flight (local TCP +24%) ([dd1d8d95050](https://github.com/nitroos-org/reactos/commit/dd1d8d95050))
+- A refused non-blocking connect notifies as on Windows (FD_CONNECT carries the error once, WSAPoll reports POLLHUP|POLLWRNORM|POLLERR); no duplicate FD_CONNECT/FD_WRITE ([024a1da5204](https://github.com/nitroos-org/reactos/commit/024a1da5204))
+- The MSI custom action server starts in the system directory, so installers that start programs by bare name work (Oracle XE port check); netstat prints Windows' column layout ([a83404c6a01](https://github.com/nitroos-org/reactos/commit/a83404c6a01))
+- A listener refuses the connections its backlog has no room for before answering them, as Windows does, instead of completing and then resetting them ([149a1c57246](https://github.com/nitroos-org/reactos/commit/149a1c57246))
+- NDIS hands queued sends to a serialized SendPackets miniport in one call, and the e1000 rings its doorbells less often (HTTP download from the host +13%) ([252f5d3e451](https://github.com/nitroos-org/reactos/commit/252f5d3e451))
+- TCP segments to the loopback interface go straight back to lwIP with one copy, without NDIS packets or the IP receive path (switch NitroLoopbackFastPath) ([31a5e5d9312](https://github.com/nitroos-org/reactos/commit/31a5e5d9312))
+- --datagram: 32-bit bind matrix and UDP loopback exchange ([7def29e5d09](https://github.com/nitroos-org/reactos/commit/7def29e5d09))
+- LwIP finds TIME-WAIT connections through a 4-tuple hash and the ephemeral-port search no longer walks them (connect rate stays flat in a connect loop) ([46d37311062](https://github.com/nitroos-org/reactos/commit/46d37311062))
+- E1000 receive buffer and descriptor rings in cached memory (HTTP download 55 -> 91 MB/s) ([01984484948](https://github.com/nitroos-org/reactos/commit/01984484948))
+- Loopback TCP uses a large MSS (127/8 only; loopback 79 -> 226 MB/s); e1000 reports an IP MTU of 1500 (was 1508); lwIP sanity walks only in debug builds ([b3994575260](https://github.com/nitroos-org/reactos/commit/b3994575260))
+- Rpcrt4 interface security callback and RPC_IF_ALLOW_LOCAL_ONLY as measured on Windows 10 (callback gets the interface syntax identifier, TCP is never local, unauthenticated np/TCP callers are re-checked on every call) ([f68817a4883](https://github.com/nitroos-org/reactos/commit/f68817a4883))
+- Security fix (described generically): hardening in this area; details withheld until users have had time to update ([cd3a069db4b](https://github.com/nitroos-org/reactos/commit/cd3a069db4b))
+- (part 2 of 2): as on Windows, advapi32 imports rpcrt4 and rpcrt4 delay-loads ws2_32, so a console process importing advapi32 maps no socket or window DLL (x64 14 -> 8 modules); x86 guests now load rpcrt4 like Windows (was ... ([2619918a91b](https://github.com/nitroos-org/reactos/commit/2619918a91b))
+
+</details>
+
+<details><summary>Storage/USB/PnP/drivers (3 fixes)</summary>
+
+- SetupDiGetClassBitmapIndex implemented (the stub killed its caller); TVM_GETITEMSTATE returns the state image bits with TVS_CHECKBOXES as Windows ([76bbf769042](https://github.com/nitroos-org/reactos/commit/76bbf769042))
+- RegisterDeviceNotification works from 32-bit processes (fixed-width PnP RPC field), interface lists sized in characters, tab insertion without a selection does not select (WinSCP starts) ([55568b3324d](https://github.com/nitroos-org/reactos/commit/55568b3324d))
+- Atapi stops using NCQ on a device after an NCQ error recovery that cannot identify the failed command, so a persistently failing request is counted and reported (8 s, 10 attempts) instead of being requeued forever (AHCI guest ... ([8b469758a44](https://github.com/nitroos-org/reactos/commit/8b469758a44))
+
+</details>
+
+<details><summary>Shell/explorer/common-controls (3 fixes)</summary>
+
+- Comctl32 commctrl.c to UTF-8 and without the old DllGetVersion ([db398f7701e](https://github.com/nitroos-org/reactos/commit/db398f7701e))
+- The classic Start menu shows no '(Empty)' placeholder or divider when nothing is pinned above Programs; Task Manager counts system handles again ([3c46dcf7b34](https://github.com/nitroos-org/reactos/commit/3c46dcf7b34))
+- Help and Support, bug-report and update links point to NitroOS (one place in version.cmake); ReactOS credits unchanged ([2d339130d0a](https://github.com/nitroos-org/reactos/commit/2d339130d0a))
+
+</details>
+
+<details><summary>Setup/boot (4 fixes)</summary>
+
+- Application, System and Security event logs default to 20 MB, overwrite as needed, as on Windows 10 (writers no longer fail with ERROR_EVENTLOG_FILE_FULL after 512 KB) ([ea83cf0982a](https://github.com/nitroos-org/reactos/commit/ea83cf0982a))
+- SMSS caps cross-session forwards in flight so a stuck target csrss cannot wedge it, and length-checks the one-way message (sessions flag 5) ([fc535fcc550](https://github.com/nitroos-org/reactos/commit/fc535fcc550))
+- A process created into another session is registered with that session's csrss through SMSS (NitroSessions 5, off by default) ([ec0aa1a35cf](https://github.com/nitroos-org/reactos/commit/ec0aa1a35cf))
+- "based on ReactOS" instead of "unofficial build based on ReactOS" in the watermark, About and setup notices (operator 2026-11-09) ([0daec3d99c6](https://github.com/nitroos-org/reactos/commit/0daec3d99c6))
+
+</details>
+
+<details><summary>Services/security/profiles (14 fixes)</summary>
+
+- Decide under the database lock which stop ends a shared process's dispatcher; a start after that gets a new process ([4937ac317ee](https://github.com/nitroos-org/reactos/commit/4937ac317ee))
+- Service stops: srvsvc, wkssvc, browser and dnsrslvr wait for calls in flight on a worker, not on the control thread ([241df440565](https://github.com/nitroos-org/reactos/commit/241df440565))
+- The SAM user query fix: no lsass heap block leaked per full user query ([c5c4e73b600](https://github.com/nitroos-org/reactos/commit/c5c4e73b600))
+- RPC server fixes: explicit generic handles get their own memory, shared-process services unregister only their own interfaces, svchost ends with its last service ([f71844a1e73](https://github.com/nitroos-org/reactos/commit/f71844a1e73))
+- Rpcrt4 calls the unbind routine of an explicit generic handle with the bound handle (no binding leaked per call); eventlog backup no longer closes a stack value ([b1d99923492](https://github.com/nitroos-org/reactos/commit/b1d99923492))
+- Callers of the system random number generator fail cleanly instead of using uninitialised bytes or spinning when it refuses ([36a8a1b5bf8](https://github.com/nitroos-org/reactos/commit/36a8a1b5bf8))
+- A cryptographic system random number generator: ksecdd ChaCha20 generator seeded from RDSEED/RDRAND and jitter, RtlGenRandom and BCryptGenRandom on top of it ([6e7a7fe95f6](https://github.com/nitroos-org/reactos/commit/6e7a7fe95f6))
+- RPC connections bound at the same time share one association group (concurrent LSA calls and same-machine NTLM exchanges no longer fail with a context mismatch); an expired local NTLM context reports SEC_E_CONTEXT_EXPIRED as on ... ([07643f53484](https://github.com/nitroos-org/reactos/commit/07643f53484))
+- Same-machine NTLM with the default credentials is a local call, as on Windows: LSA-issued context bound to the client's own token, accepted only by the issuing process; bounded per user, freed when the issuer exits or the context ... ([d4bbeae905e](https://github.com/nitroos-org/reactos/commit/d4bbeae905e))
+- Any caller may connect to the LSA authentication port (LsaConnectUntrusted, as on Windows); the Negotiate package passes QuerySecurityContextToken and impersonation to NTLM (Oracle XE OS authentication works) ([4cbb5e09aa2](https://github.com/nitroos-org/reactos/commit/4cbb5e09aa2))
+- Crypt32 and the Cryptography key are opened with the access the operation needs (read-only store and chain opens, write only when writing; no HKLM write opens by a standard user's TLS) ([206bee50fbd](https://github.com/nitroos-org/reactos/commit/206bee50fbd))
+- The password-less logon of LocalService and NetworkService is for a trusted caller only (access denied otherwise, as Windows 10) ([9798fcbb6e3](https://github.com/nitroos-org/reactos/commit/9798fcbb6e3))
+- Service virtual accounts (NT SERVICE\<service> SIDs, lookups, service logon for trusted callers only), kernel-object GetNamedSecurityInfo, whole-SID local group members, CVssWriter exports; LSA no longer believes a client's own ... ([95c15860b6c](https://github.com/nitroos-org/reactos/commit/95c15860b6c))
+- CertCreateCertificateChainEngine accepts the current SDK config size and WSAIoctl answers SIO_BASE_HANDLE, so rustup and other rustls/tokio programs work ([70707e41812](https://github.com/nitroos-org/reactos/commit/70707e41812))
+
+</details>
+
+<details><summary>User-mode system DLLs (52 fixes)</summary>
+
+- CreateProcessAsUser hands the token to kernel32 only for another session, so a same-session call no longer needs SeTcbPrivilege (fails with 1314 before); LsassLeak test measures after the heap warm-up ([06d8f643619](https://github.com/nitroos-org/reactos/commit/06d8f643619))
+- The FindFirstFile FILE_SHARE_DELETE fix (Oracle XE setup.exe first run) ([46e5bf885bd](https://github.com/nitroos-org/reactos/commit/46e5bf885bd))
+- Sppc answers ProductKeyGroupUniqueness and pkeyConfigLicenseId of a SKU from its end-user license ([15b2e41c5f3](https://github.com/nitroos-org/reactos/commit/15b2e41c5f3))
+- OnlineId GetTicketAsync without an online identity answers ServiceConnectionError like Windows offline ([283783116ce](https://github.com/nitroos-org/reactos/commit/283783116ce))
+- RtlpExtendHeap no longer returns a free block shorter than the request ([0a594940226](https://github.com/nitroos-org/reactos/commit/0a594940226))
+- The loader initialises a module that is mapped but not yet initialised before LoadLibrary, GetProcAddress or a new importer use it, and a failure there fails the outer load, as on Windows (Excel starts) ([c9ed39c0dfa](https://github.com/nitroos-org/reactos/commit/c9ed39c0dfa))
+- Heap front end gives back parked blocks nobody takes, before the heap grows and in time ([31c549a2776](https://github.com/nitroos-org/reactos/commit/31c549a2776))
+- Heap segments stop doubling at 16192 KB, a churning heap gives back stranded runs instead of reserving new segments, 64-bit heaps still grow past 4.9 GB ([f461562ba56](https://github.com/nitroos-org/reactos/commit/f461562ba56))
+- ApiInformation treats a class whose DllPath does not expand within MAX_PATH as not registered ([bd0492e0764](https://github.com/nitroos-org/reactos/commit/bd0492e0764))
+- Rpcrt4 client reuses a pooled connection for a new binding handle only for the same token state (logon id + ModifiedId); identities no longer cross between overlapping handles ([5e0796e3585](https://github.com/nitroos-org/reactos/commit/5e0796e3585))
+- HeapCompact implemented; a failed grow in place is counted once; the free path finds the commit cap only for a block it can decommit ([c620a3befc5](https://github.com/nitroos-org/reactos/commit/c620a3befc5))
+- Heap small-block front end at the Windows 10 thresholds, shared freed blocks, counters outside the block space ([935d44d6140](https://github.com/nitroos-org/reactos/commit/935d44d6140))
+- Kk-KZ has no default ANSI code page, as on Windows 10; the FontNullLifetime test yields to the main thread (it looked like a guest hang) ([7c4a3a30021](https://github.com/nitroos-org/reactos/commit/7c4a3a30021))
+- Rometadata.dll with MetaDataGetDispenser (E_NOTIMPL), so the Windows App SDK runtime loads (PowerToys no longer stops on a missing import) ([66024876eef](https://github.com/nitroos-org/reactos/commit/66024876eef))
+- The heap extends into an uncommitted range together with the free blocks around it, and never returns an entry shorter than the request (csrss no longer strands a page per ~86 consoles; session-1 growth 34 -> 0.68 B per console ... ([213d6e7b17d](https://github.com/nitroos-org/reactos/commit/213d6e7b17d))
+- LOCALE_FONTSIGNATURE of all 231 locales as measured on Windows 10 ([55b824d1759](https://github.com/nitroos-org/reactos/commit/55b824d1759))
+- Derived code pages, abbreviations and OpenType tags of the 85 round-5 locales as measured on Windows 10 ([03daa065069](https://github.com/nitroos-org/reactos/commit/03daa065069))
+- I386 builds for DLL export version 0x502 build, install and boot again (version-gated modules and tests, vista import libs below 0x600) ([2b04779d20c](https://github.com/nitroos-org/reactos/commit/2b04779d20c))
+- A 32-bit image that opts in to DEP (/NXCOMPAT) runs with DEP under the default OptIn policy, as on Windows; FaultContext checks the exception record of read, write and execute access violations ([5350833b17e](https://github.com/nitroos-org/reactos/commit/5350833b17e))
+- User-mode heaps keep free pages as a bounded cache (a quarter of the committed size) and trim it after a quiet second, instead of decommitting and recommitting on every churn (Word shader draws -19%, heap churn 2.5x faster, idle ... ([2d62d6a4716](https://github.com/nitroos-org/reactos/commit/2d62d6a4716))
+- I386 thread start: a routine that returns with EBP, EBX, ESI or EDI replaced (the Go runtime's) ends its thread instead of crashing ([0be54783394](https://github.com/nitroos-org/reactos/commit/0be54783394))
+- A vectored-handler walk that never returns no longer pins removed handlers for the process lifetime (per-thread slots claimed and released lock-free; nothing on a walk or at thread exit waits for the lock) ([731eec682af](https://github.com/nitroos-org/reactos/commit/731eec682af))
+- Dcomp presentation never makes the app wait (Commit records a frame and returns; a dcomp render thread reads back only changed surfaces and presents; window hooks never block) ([3df74759364](https://github.com/nitroos-org/reactos/commit/3df74759364))
+- Time zone display names in the (UTC...) style for all zones; Dynamic DST from IANA tzdata for British Columbia, Alberta, Manitoba, Paraguay and Morocco ([48f0fed4ec8](https://github.com/nitroos-org/reactos/commit/48f0fed4ec8))
+- An unloaded DLL's data table entry frees its base name (every LoadLibrary/FreeLibrary cycle leaked it) ([92b36a3a4ca](https://github.com/nitroos-org/reactos/commit/92b36a3a4ca))
+- Dcomp draws a DesktopWindowTarget's visual tree into its window on commit (Word shows its Start screen); Compositor.CreatePropertySet; ICompositionGraphicsDeviceInterop ([bad883cee46](https://github.com/nitroos-org/reactos/commit/bad883cee46))
+- Dcomp ExpressionAnimation, CompositionPropertySet and Interactions.InteractionTracker (stored state; one of Word's exit paths) ([aa621c6dc49](https://github.com/nitroos-org/reactos/commit/aa621c6dc49))
+- Amd64 RtlCreateUserThread starts the thread in RtlUserThreadStart (a routine that returns ends the thread); DebugApi checks the debug event file handles ([e627738e521](https://github.com/nitroos-org/reactos/commit/e627738e521))
+- A thread's old TLS vector lives until the thread ends, also for the thread that loads a TLS DLL (Oracle XE database creation no longer crashes in its OLAP callout) ([a028d68a621](https://github.com/nitroos-org/reactos/commit/a028d68a621))
+- Heap fixes: whole-heap HeapValidate passes on a consistent heap, a fixed-size heap over 1 MB keeps all its free space (no more hang), the failed-descriptor decommit path re-inserts the right size; kernel32 heap winetest runs on ... ([9949688d6db](https://github.com/nitroos-org/reactos/commit/9949688d6db))
+- GetThreadGroupAffinity fails with ERROR_INVALID_PARAMETER for a NULL output instead of writing through it (kernel32 thread winetest no longer crashes) ([28f65049dd7](https://github.com/nitroos-org/reactos/commit/28f65049dd7))
+- Dcomp accepts a Direct2D-only rendering device (Office passes one) and answers the real ICompositionDrawingSurfaceInterop ([b54d43f1197](https://github.com/nitroos-org/reactos/commit/b54d43f1197))
+- Exceptions scale across threads (lock-free vectored handler walk, fault with no VAD answers before the address-space lock, per-CPU xstate spare, cached pointer cookie) and the .NET NullReferenceException path no longer fails an ... ([2bc858ec618](https://github.com/nitroos-org/reactos/commit/2bc858ec618))
+- A removed vectored handler is never called or freed under a running walk (second remove returns 0); the module range table recovers after overflow; KD exception-report decision shared ([19981715866](https://github.com/nitroos-org/reactos/commit/19981715866))
+- Windows.UI.Composition CompositionNineGridBrush (interface ids and order from microsoft/windows-rs); Word now reaches its splash window ([84c8fd2a1e1](https://github.com/nitroos-org/reactos/commit/84c8fd2a1e1))
+- First-chance exceptions 1.4-2.5x faster (XState buffers from a lookaside, debugger paging only when KD stops, vectored handlers under a shared lock with refcounts, module lookup without the loader lock) ([46379529d7d](https://github.com/nitroos-org/reactos/commit/46379529d7d))
+- Windows.UI.Composition.Interactions.VisualInteractionSource (registered to dcomp as on Windows), IVisual2, ICompositor2, ICompositionSurfaceBrush3 (interface ids and order from microsoft/windows-rs) ([710c3bc5aa6](https://github.com/nitroos-org/reactos/commit/710c3bc5aa6))
+- 85 more locales from CLDR 49.0.0 with MS-LCID identities (231 locales; .NET sees 233 cultures), GetDateFormat genitive-month hang fixed, i386 base addresses of kernel32 and the DLLs below it moved down ([a47cda4de1a](https://github.com/nitroos-org/reactos/commit/a47cda4de1a))
+- Amd64 RtlVirtualUnwind raises STATUS_BAD_FUNCTION_TABLE for undefined unwind ops (as Windows 10) instead of looping, slot table covers all 16 ops ([daf5be7dd05](https://github.com/nitroos-org/reactos/commit/daf5be7dd05))
+- Windows.UI.Composition CompositorController, ICompositorDesktopInterop and DesktopWindowTarget (interface ids and member order from microsoft/windows-rs, MIT/Apache-2.0) ([c4d3fec03b1](https://github.com/nitroos-org/reactos/commit/c4d3fec03b1))
+- CreateDispatcherQueueController on the current thread accepts every apartment option, as measured on Windows 10 ([a6674cc0275](https://github.com/nitroos-org/reactos/commit/a6674cc0275))
+- Cross-session create retries a stale session pick, fails closed on a NULL session, and never returns attached to the child ([e0536a78320](https://github.com/nitroos-org/reactos/commit/e0536a78320))
+- Mscms implements the Wcs default-profile queries (as measured on Windows) and ships a CC0 sRGB profile generated from the published standards (GIMP starts) ([6d681e30482](https://github.com/nitroos-org/reactos/commit/6d681e30482))
+- Unmanifested programs can be told Windows 8 (6.2) by GetVersion(Ex)/VerifyVersionInfo as on Windows 10, behind a switch that is off by default (UnmanifestedVersionLie) ([0e4f7c59a0a](https://github.com/nitroos-org/reactos/commit/0e4f7c59a0a))
+- Locale tables from CLDR round 4: quoted words in long dates and the Swiss group separator closer to Windows' forms (no field worse) ([1f00303a6fc](https://github.com/nitroos-org/reactos/commit/1f00303a6fc))
+- Follow-ups: a session is looked up only among complete processes and a session that went away is access denied; kernel32 returns a Safer token only when asked ([79b25140274](https://github.com/nitroos-org/reactos/commit/79b25140274))
+- QueueUserWorkItem keeps items in a list and wakes workers only when needed (3.1x faster); x64 NtQuerySystemTime is a short assembly stub (1.9x faster) ([f21748b69aa](https://github.com/nitroos-org/reactos/commit/f21748b69aa))
+- Windows.Foundation.PropertyValue activation factory in wintypes (boxed values and arrays as on Windows 10); Word gets past its PropertyValue abort ([2903dbaedc6](https://github.com/nitroos-org/reactos/commit/2903dbaedc6))
+- Heap front end serves size-class blocks (a freed block is found by the class requests look in), may take the next class up, 64 slots with 512 KB each, and a growing heap no longer flushes the cache; heapmt 4x250k x64 235 -> 11 ... ([e6d44cff918](https://github.com/nitroos-org/reactos/commit/e6d44cff918))
+- (part 1): NtQuerySystemTime reads the shared user data page in ntdll instead of entering the kernel, as on Windows (2M calls: x64 155 -> 7 ms, x86 95 -> 8 ms) ([2ae5c660101](https://github.com/nitroos-org/reactos/commit/2ae5c660101))
+- (condvar): condition variables use the default keyed event (NULL handle, as Windows), so a wake or wait from a program's code running inside the loader before ntdll's init no longer asserts in Debug builds; NtKeyedEvent apitest ... ([f8b6c2cef6a](https://github.com/nitroos-org/reactos/commit/f8b6c2cef6a))
+- Round 3 CLDR mapping rules (Latin-numbering symbols, CSV list separator, localized AM/PM kept, currency sign position, fullwidth forms, script in multi-script language names, CJK console fallback, Um al-Qura default for SA ... ([91f1273622b](https://github.com/nitroos-org/reactos/commit/91f1273622b))
+
+</details>
+
+<details><summary>Browser/COM/Wine imports (2 fixes)</summary>
+
+- Exe custom action launch failure fails the install (MSI-CA-EXE-LAUNCH-FAILURE) ([ae72a632b6a](https://github.com/nitroos-org/reactos/commit/ae72a632b6a))
+- An administrative MSI install copies every feature whatever its Level and drops embedded cabinets from the image, as Windows does (scoop install mongodb) ([164f04178bd](https://github.com/nitroos-org/reactos/commit/164f04178bd))
+
+</details>
+
+<details><summary>Applications/tools (10 fixes)</summary>
+
+- Featmgr does not install the old hosted lavapipe pack over newer in-tree Mesa drivers (already newer, skipped) ([95445921ead](https://github.com/nitroos-org/reactos/commit/95445921ead))
+- Featmgr names the existing install an installer updated instead of 'success but not installed' ([564e988991f](https://github.com/nitroos-org/reactos/commit/564e988991f))
+- The certificate seeding service skips the store opens when the built-in roots have not changed since the last seed ([b436d112f01](https://github.com/nitroos-org/reactos/commit/b436d112f01))
+- The machine Root and AuthRoot certificate stores are populated as SYSTEM at setup and at boot (a standard user never needs to write HKLM SystemCertificates) ([ab20dd4ef32](https://github.com/nitroos-org/reactos/commit/ab20dd4ef32))
+- Csrss no longer grows with every drive letter define/remove (the broadcast thread ends through the loader, freeing its TLS vector and activation context stack); churn test DefineDosDevice phase ([9cfa1057867](https://github.com/nitroos-org/reactos/commit/9cfa1057867))
+- Featmgr does not follow junctions or symlinks under Scoop persist when it writes app defaults; JSONC brackets must match, BOM-less UTF-16 refused ([47c674dfca8](https://github.com/nitroos-org/reactos/commit/47c674dfca8))
+- Answer-file key [Unattend] AcknowledgeAddonNotices: unattended setups accept the first-boot add-on notices (AAC), interactive setups still show them once ([d3d11d92f35](https://github.com/nitroos-org/reactos/commit/d3d11d92f35))
+- Optional Features gets an icon, the Claude Desktop entry is removed, and first boot installs the full AAC decoder with its patent notice shown once ([a0575d01fe0](https://github.com/nitroos-org/reactos/commit/a0575d01fe0))
+- Featmgr reports a component as installed only when its detect rule holds after the installer exits 0 ([da54a44e4ef](https://github.com/nitroos-org/reactos/commit/da54a44e4ef))
+- Diskpart makes a new extended partition the disk's logical container with its free space, so "create partition logical" works in the same session (it needed a rescan) ([ea6ee4ffe03](https://github.com/nitroos-org/reactos/commit/ea6ee4ffe03))
+
+</details>
+
+<details><summary>Build/toolchain/API surface (12 fixes)</summary>
+
+- The comctl32 of the v6 side-by-side assembly reports 6.16.10586 (DllGetVersion and version resource) as on Windows 10; the v5 comctl32 stays 5.82 ([a157ed6f9cc](https://github.com/nitroos-org/reactos/commit/a157ed6f9cc))
+- I386 base address tables with growth room per DLL (kernel32 had 44 KB below ntdll) and a build-time check that fails on any i386 image overlap ([bb486159b04](https://github.com/nitroos-org/reactos/commit/bb486159b04))
+- 143 time zones (UTC and 58 more, from CLDR windowsZones + IANA tzdata) with MUI_Display/Std/Dlt strings in a new tzres.dll ([007b457a2b8](https://github.com/nitroos-org/reactos/commit/007b457a2b8))
+- SignerSign/SignerSignEx/SignerSignEx2 and the PE SIP (create, verify, remove indirect data, page hashes): Authenticode signing roundtrips ([47d66c5288b](https://github.com/nitroos-org/reactos/commit/47d66c5288b))
+- Mscms gains Little CMS 2.20 (MIT, as Wine bundles it): profile objects and colour transforms work ([bb8db1fed8e](https://github.com/nitroos-org/reactos/commit/bb8db1fed8e))
+- Reproducible builds (NITRO_REPRODUCIBLE_BUILD / NITRO_STABLE_BUILD_ID), OS-update U1 ([4f9dc8aa3a7](https://github.com/nitroos-org/reactos/commit/4f9dc8aa3a7))
+- System DLLs carry the Windows 10 product version, so Java reports Windows 10 / 10.0 ([9a28a56c5c7](https://github.com/nitroos-org/reactos/commit/9a28a56c5c7))
+- Every user-mode NitroOS executable declares Windows 10 in its compatibility manifest, with a build lint (no behaviour change; prepares the Windows version lie) ([a26219ba130](https://github.com/nitroos-org/reactos/commit/a26219ba130))
+- (weekly upstream sync: reactos/master 8fe3cee0560, 96 commits since e46f4bb1a1e; 13 conflicts resolved per the inner merge message: upstream wins except the fork storport timeouts/restart/serial-number/buffer-mapping/transfer-cap ... ([5bb9f93e7e4](https://github.com/nitroos-org/reactos/commit/5bb9f93e7e4))
+- Sppc application authentication data and unlicensed answers ([085f31b9053](https://github.com/nitroos-org/reactos/commit/085f31b9053))
+- Sppc/slc answer as Windows 10 does for installed, never-activated Office (measured on a disposable Windows copy): SKUs listed in ascending id order and reported Unlicensed (0xC004F014), key queries 0xC004F012, SKU information ... ([5694a5fea6d](https://github.com/nitroos-org/reactos/commit/5694a5fea6d))
+- Sppc/slc export the Software Licensing client names Office resolves (documented ones return the documented no-service errors, undocumented ones SL_E_NOT_SUPPORTED on 64-bit only), SLGetLicensingStatusInformation returns the ... ([b94450f51e0](https://github.com/nitroos-org/reactos/commit/b94450f51e0))
+
+</details>
+
+<details><summary>Tests only (14 fixes)</summary>
+
+- NtFreeVirtualMemory interior-base apitest (Windows 10 rows: first page frees the region, past it STATUS_FREE_VM_NOT_AT_BASE) ([5e41df0f772](https://github.com/nitroos-org/reactos/commit/5e41df0f772))
+- Access-check differential tests (sampled matrix with a golden hash by default, the full matrix on request) ([e518167a166](https://github.com/nitroos-org/reactos/commit/e518167a166))
+- Advapi32_apitest OpenThreadTokenLeak (no handle or token leak from OpenThreadToken on an impersonating thread) ([fd07b532e10](https://github.com/nitroos-org/reactos/commit/fd07b532e10))
+- Kernel32 apitest checks that every locale name of the data resolves (and the Wine-only names Windows rejects stay unresolved) ([d02e15942ac](https://github.com/nitroos-org/reactos/commit/d02e15942ac))
+- Fsregrow never deletes a still-running thread's file after a join timeout (the reported verify-open failure was the test), plus a reopen stress test and failure diagnostics ([7534af80902](https://github.com/nitroos-org/reactos/commit/7534af80902))
+- Ws2_32 apitest acceptlag (a single loopback client's connects are answered at once in the first seconds after boot) ([6e148c6e82f](https://github.com/nitroos-org/reactos/commit/6e148c6e82f))
+- Kernel32 apitest CsrAdoptedThreadChurn measures csrss growth after a warm-up (no per-call growth; one-time commit on i386 Debug) ([17643f6e596](https://github.com/nitroos-org/reactos/commit/17643f6e596))
+- Build the d3d11 and d3d10core conformance tests (Wine 10.0) ([78f1dc510a6](https://github.com/nitroos-org/reactos/commit/78f1dc510a6))
+- Ntdll apitest NtRemoveIoCompletionTerminate (a waiter terminated while a completion is posted loses nothing, for every packet kind) ([d19e24abc0e](https://github.com/nitroos-org/reactos/commit/d19e24abc0e))
+- FaultContext test stops cleanly after a timeout, covers every faulting thread with the suspender and resumes before reporting ([b0594145bfd](https://github.com/nitroos-org/reactos/commit/b0594145bfd))
+- Kernel32 apitest CsrAdoptedThreadChurn (CSRSS drops the records of threads it adopted when they end) ([73b537d5be5](https://github.com/nitroos-org/reactos/commit/73b537d5be5))
+- Rpcrt4 interface_access refusal rows go through a generated stub and check the status a denied client sees (5, measured on Windows 10) ([533e0e32dea](https://github.com/nitroos-org/reactos/commit/533e0e32dea))
+- ZwAllocateVirtualMemory kmtest expects the Windows 10 statuses measured on the oracle ([3f783e7863a](https://github.com/nitroos-org/reactos/commit/3f783e7863a))
+- PagerBasic samples its paging-file baseline after the process' own pages went out, and checks the test range's slots both ways ([78ceb4c258a](https://github.com/nitroos-org/reactos/commit/78ceb4c258a))
+
+</details>
+
+### Limitations
+New in this release:
+- **IPv6, known differences from Windows:** IPv6 neighbour entries (`GetIpNetTable2`, `GetIpNetEntry2`, `ResolveIpNetEntry2`), the IPv6 forwarding table and `GetBestRoute2` for IPv6 destinations, IPv6 change notifications (`NotifyIpInterfaceChange` and similar never fire for AF_INET6), `GetTcp6Table2` (empty; `GetExtendedTcpTable(AF_INET6)` does list IPv6 sockets), the AF_INET6 statistics calls (they return IPv4 counters) and `IPV6_V6ONLY` on an AF_INET socket (accepted; Windows refuses it) answer as a system without IPv6. `IPV6_RECVIF` and `IPV6_RECVTCLASS` are accepted but `WSARecvMsg` does not deliver their control messages yet; `IPV6_UNICAST_IF` is not enforced on sends. This machine receives IPv6 UDP datagrams of at most 65487 bytes (Windows: 65527). With IPv6 on, a third-party Ethernet driver that stores the multicast list in its station-address registers can stop receiving unicast frames; tcpip detects this when an IPv4 router answers and falls back to all-multicast, and `Tcpip\Parameters\Ipv6Enable = 0` is the workaround. IPv6 is on by default; to turn it off: `reg add HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters /v Ipv6Enable /t REG_DWORD /d 0 /f` and restart (the loopback interface keeps IPv6, as on Windows).
+- **IPv4 multicast without IGMP:** IPv4 groups are not announced with IGMP, so a switch that snoops IGMP does not forward them to NitroOS (Windows sends IGMPv3). An IPv4 multicast datagram reaches every socket bound to its port that has no filter for the group, joined or not (Windows: only sockets that joined). With `Ipv6Enable = 0`, IPv4 multicast does not arrive.
+- **Firewall rules with conditions the filter cannot match:** the filter matches protocol, ports, addresses, ICMP type and code, interface type and program. An Allow rule that also names a service (`service=<name>` or `service=any`), connection security, authorised users or computers, a local user, a package or a specific interface is not enforced, so it lets nothing in where Windows lets the matching traffic in (narrower than Windows, never broader). A Block rule with such a condition is applied without it and so blocks more than written. Both are reported in `HKLM\SOFTWARE\ReactOS\Nitro\Firewall` (`LastPushRejectedRules`, `LastPushRejectedNames`, `LastPushBroadBlockRules`) and in the Application event log.
+- **Rare crash in DirectWrite (Firefox):** in a 12-hour stress test, one Firefox child process stopped once with an access violation in `dwrite.dll` (the browser carried on). A fix is in progress (ticket SOAK-dwrite-av-null-0x11).
+- **NTFS-NG file cache size:** NTFS-NG keeps up to about 2.6 % of RAM (about 158 MB on a 6 GB machine) of recently used file information in memory by design. It gives memory back under memory pressure; it is not a leak.
+- **schannel:** `SCH_CREDENTIALS.pDisabledCrypto` is accepted but not enforced (the cipher suite list is mbedTLS's default), and disabling protocols applies to outbound connections only (TLS server-side is not implemented).
+- **Oracle Database XE 21c EM Express:** https://localhost:5500/em does not load yet; the database at localhost:1521 works.
+- **Image sections and unflushed writes:** Creating an image section from a file that also has a writable mapping sees writes that were not yet flushed (Windows reads those pages from disk). No effect on normal program loading.
+- **FAT system volume:** Installing to a FAT system volume: the system can fail to start after the first restart ('SYSTEM hive could not be used'), because a grown registry hive file's size is not written back. Use NTFS, the default.
+- **USB3:** the USB3 (xHCI) stack that came with the upstream sync is on the CD but not enabled by default.
+
+Carried over from 2026.11-1:
+- **Pager:** on by default on amd64 only. i386 has it off. `NitroPager=0` (HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management) turns it off on amd64. FAT page files were not reviewed under the pager.
+- **Locale formats** come from Unicode CLDR 49. They are closer to Windows than in 2026.11-1, but several non-English cultures still format dates, numbers and currency differently from Windows.
+- **Live CD desktop:** the live desktop of the boot CD has no 32-bit apps (installed systems are unaffected).
+- **Word** installs and now reaches its Start screen, but it does not run yet: it stops at its licence check.
+- **UIPI is missing:** there is no cross-process window message isolation between integrity levels.
+- **VS Code integrated terminal** renders corrupted with its default WebGL renderer in most launches. Workaround: set `terminal.integrated.gpuAcceleration` to `off`.
+- **Installs made before `57c2c276858`** had user-writable system directories; the upgrade boot fixes existing installs.
+- Tested under QEMU/KVM only; real-hardware paths (notably the APIC HAL) are not covered.
+
+Fixed since 2026.11-1: the 64-bit data corruption issue (see Highlights); a 1,400 MB program next to a `git clone` on a 1 GB machine now completes.
+
+### Licences
+- ReactOS and the fork's own code: GPL-2.0-or-later (0 added files with GPL-2.0-only SPDX identifiers in the release patch).
+- Locale data: generated from Unicode CLDR 49.0.0, Unicode License v3 (Unicode-3.0); the notice ships on the CD.
+- Time zones: generated from CLDR windowsZones (Unicode License v3) and IANA tzdata (public domain).
+- mscms: Little CMS 2.20 (MIT), as Wine bundles it; the default sRGB profile is generated and CC0.
+- Mesa (MIT), LLVM (Apache-2.0 with LLVM exception) and the Vulkan loader: licence texts ship on the CD next to the DLLs; the DLLs are standalone aggregates.
+- Fonts: their licences are in `3rdParty` on the CD.
+
+### Changes since the previous Nitro
+This is the first release after 2026.11-1 (published 2026-11-09, `f2ee4900dab`). The upstream base moves from `e46f4bb1a1e` to `8fe3cee0560` (weekly sync #5); the delta is 453 first-parent changes, all listed under Bug fixes above. Note: on 2026-11-16 the fork's history was rewritten to correct commit metadata; the `nitro-2026.11-1` tag now points to `f2ee4900dab` (same tree as the original `87c24e29c3a`).
 
 ## reactos-nitro 2026.11-1
 

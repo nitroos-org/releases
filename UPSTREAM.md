@@ -4,13 +4,13 @@ reactos-nitro tracks ReactOS master and merges it regularly. We keep our changes
 
 This is written in good faith from the public ReactOS commit history; it is our reading, not a statement from the ReactOS project.
 
-**Last synced with ReactOS master:** [`e46f4bb1a1e`](https://github.com/reactos/reactos/commit/e46f4bb1a1ea7c722f941231565144fe0c286d3e) (2026-10-25, weekly sync #4; 59 upstream commits since `f53b1d15601`). `nitro-2026.10-5` is built on this commit; the patch series applies to it unchanged.
+**Last synced with ReactOS master:** [`8fe3cee0560`](https://github.com/reactos/reactos/commit/8fe3cee05606aecd9442674e40038649f048d10d) (2026-11-10, weekly sync #5; 96 upstream commits since `e46f4bb1a1e`). `nitro-2026.11-2` is built on this commit; its cumulative patch applies to it unchanged.
 
 ## What upstream is actively working on that overlaps with us
 
 - **NTFS write and install.** Upstream has added experimental NTFS write and NTFS install support to its own `ntfs` driver (e.g. [#9316](https://github.com/reactos/reactos/pull/9316), [#9319](https://github.com/reactos/reactos/pull/9319), [#9700](https://github.com/reactos/reactos/pull/9700)) and is still improving it.
 - **SMP / APIC.** Ongoing HAL work (for example x2APIC support).
-- **USB3.** A new USB3 stack is being built (xHCI/UCX, [#9623](https://github.com/reactos/reactos/pull/9623)).
+- **USB3.** Upstream's new USB3 stack (xHCI/UCX, [#9623](https://github.com/reactos/reactos/pull/9623)) arrived with sync #5. Its files are on the NitroOS CD, but NitroOS does not enable it by default yet, because with an xHCI controller in our test virtual machines it stops the system with error 0xCA. We will enable it when it works there.
 - **MMC.** A new Microsoft Management Console implementation is in progress.
 - **Shell.** Continuing shell work (for example IShellItem2, [#9692](https://github.com/reactos/reactos/pull/9692)).
 

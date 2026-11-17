@@ -52,6 +52,21 @@ Each figure is the median over 4 rounds of 5 runs, with the systems interleaved 
 
 **What we are working on** for the next releases: sequential writes, small-file creation, file-system caching on small machines, paging speed, and the multi-threaded heap.
 
+### Update for 2026.11-2: NitroOS re-measured, LiberNT not re-run
+
+On 17 November 2026 we measured NitroOS again on the same host and virtual machine model (q35, AHCI disk, 4 virtual CPUs, 4 GB, user-mode networking), with the same test programs: development build `1b87351e57e`; the release adds nine later changes (networking fixes, the IPv6 properties page, and fixes in FindFirstFile, the desktop heap, CreateProcessAsUser and network setup), none in the measured paths. One change in method: each virtual machine's CPUs were pinned to one L3 cache group of the host, which makes runs more repeatable. LiberNT was not re-run; its column is the 9 November measurement above, so read the ratios as indicative. Medians of 10 virtual machines x 5 runs.
+
+| Test | Unit | NitroOS 2026-11-09 | NitroOS 2026-11-17 | LiberNT 2026-11-09 | NitroOS (11-17) vs LiberNT |
+|---|---|--:|--:|--:|--:|
+| Sequential write 1 GB (no buffering) | MB/s | 426 | 2,105 | 1,127 | 1.87 |
+| Sequential write 1 GB (cached) | MB/s | 699 | 1,177 | 1,121 | 1.05 |
+| Create 10k small files | ms | 3,681 | 648 | 2,700 | 4.17 |
+| Read 10k small files | ms | 347 | 148 | 344 | 2.32 |
+| Enumerate a 10k-file directory x20 | ms | 144 | 51.2 | 169 | 3.30 |
+| Heap, 4 threads | ms | 219 | 10.6 | 487 | 45.9 |
+
+The three tests where NitroOS was behind on 9 November (both sequential writes and small-file creation) are now ahead or level. The no-buffering write gain comes mainly from NTFS group commit (2026.11-2): write-through writes that extend a file are committed to the journal in groups instead of one commit per write. Not re-measured: the 1 GB memory runs.
+
 ## History: 2026.10 measurements
 
 The numbers below are from a development build of October 2026 and are kept for reference only.
