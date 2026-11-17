@@ -55,7 +55,7 @@ What NitroOS adds to ReactOS, as of release 2026.11-2.
 | **System** | |
 | All your CPUs and memory | Multi-processor support is on by default in both the 32-bit and 64-bit versions, and a 4 GB machine shows 3.99 GB of usable memory. ([screenshots](#screenshots)) |
 | Memory paging | On 64-bit, memory that programs are not using is moved to the paging file, so more programs fit. A program that asks for too much memory gets an error instead of bringing down the whole system. |
-| Much faster memory handling | Up to 134 times faster than the ReactOS code it builds on, in our benchmarks. ([numbers](#speed)) |
+| Much faster memory handling | Up to 134 times faster than the ReactOS code it builds on, in our benchmarks. ([benchmarks](BENCHMARKS.md)) |
 | Accurate time in virtual machines | The clock stays accurate even under heavy load (drift of 0.004% or less). |
 | **Files and storage** | |
 | Disk Management | A Windows 7-style Disk Management tool that draws each disk and its partitions. Right-click a partition to create, format, extend or shrink a volume or change its drive letter, or set up a new disk as MBR or GPT. If an option is greyed out, the status bar tells you why. Before it changes anything, it checks that the disk is still the way you saw it, and afterwards it checks the result. ([screenshots](#screenshots)) |
