@@ -104,7 +104,7 @@ How we measured: on 8 November 2026, on one host (AMD EPYC 9254, QEMU/KVM), with
 
 ## Screenshots
 
-NitroOS (64-bit, with NitroOS branding) on freshly installed virtual machines with 4 CPUs, 4 GB of memory and a 1024x768 screen. Shots marked * are from a development build of 9 November, after release 2026.11-1; the others are from release 2026.11-1. These are unedited screen captures. Click a picture to see it full size.
+NitroOS (64-bit, with NitroOS branding) on freshly installed virtual machines with 4 CPUs, 4 GB of memory and a 1024x768 screen. Shots marked * are from a development build of 9 November, after release 2026.11-1; shots marked † are from release 2026.11-2, on our isolated IPv6 test network (its addresses are from the documentation range `2001:db8::/32`); the others are from release 2026.11-1. These are unedited screen captures. Click a picture to see it full size.
 
 | | |
 |---|---|
@@ -115,6 +115,8 @@ NitroOS (64-bit, with NitroOS branding) on freshly installed virtual machines wi
 | <a href="docs/img/nitro-features-installing.webp"><img src="docs/img/nitro-features-installing.webp" alt="Features installing the selected components"></a><br>Features installing the selected components | <a href="docs/img/nitro-diskmgmt.webp"><img src="docs/img/nitro-diskmgmt.webp" alt="Disk Management: NTFS, FAT32, a logical drive, free space and unallocated space on one disk *"></a><br>Disk Management: NTFS, FAT32, a logical drive, free space and unallocated space on one disk * |
 | <a href="docs/img/nitro-diskmgmt-wizard.webp"><img src="docs/img/nitro-diskmgmt-wizard.webp" alt="The New Simple Volume wizard creating an NTFS logical drive *"></a><br>The New Simple Volume wizard creating an NTFS logical drive * | <a href="docs/img/nitro-format.webp"><img src="docs/img/nitro-format.webp" alt="Setup, with NTFS selected"></a><br>Setup, with NTFS selected |
 | <a href="docs/img/nitro-install.webp"><img src="docs/img/nitro-install.webp" alt="Setup summary: multi-processor kernel, installing to \Windows"></a><br>Setup summary: multi-processor kernel, installing to `\Windows` | <a href="docs/img/nitro-firewall.webp"><img src="docs/img/nitro-firewall.webp" alt="NitroOS Firewall, switched on after a fresh install"></a><br>NitroOS Firewall, switched on after a fresh install |
+| <a href="docs/img/nitro-ipv6-properties.webp"><img src="docs/img/nitro-ipv6-properties.webp" alt="IPv6 is built in: TCP/IPv6 sits next to TCP/IPv4 in the connection properties, set to automatic by default †"></a><br>IPv6 is built in: TCP/IPv6 sits next to TCP/IPv4 in the connection properties, set to automatic by default † | <a href="docs/img/nitro-ipv6-ipconfig.webp"><img src="docs/img/nitro-ipv6-ipconfig.webp" alt="ipconfig /all: an address from the router, a temporary address for privacy, and the DNS server announced by the network, all picked up automatically †"></a><br>`ipconfig /all`: an address from the router, a temporary address for privacy, and the DNS server announced by the network, all picked up automatically † |
+| <a href="docs/img/nitro-ipv6-only-page.webp"><img src="docs/img/nitro-ipv6-only-page.webp" alt="PowerShell 7 fetching a web page from a name that has only an IPv6 address †"></a><br>PowerShell 7 fetching a web page from a name that has only an IPv6 address † | <a href="docs/img/nitro-ipv6-tracert.webp"><img src="docs/img/nitro-ipv6-tracert.webp" alt="tracert -6 following an IPv6 route across two hops †"></a><br>`tracert -6` following an IPv6 route across two hops † |
 
 ## Technical details
 
