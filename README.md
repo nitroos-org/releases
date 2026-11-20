@@ -11,6 +11,7 @@
 
 [![Latest release](https://img.shields.io/github/v/release/nitroos-org/releases?label=Release&style=for-the-badge&color=0B6E4F)](https://github.com/nitroos-org/releases/releases/latest)
 [![Download](https://img.shields.io/badge/Download-ISO-0B6E4F?style=for-the-badge)](#download)
+[![Source code](https://img.shields.io/badge/Source_code-nitroos--org%2Freactos-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nitroos-org/reactos)
 [![Licence: GPL 2.0 or later](https://img.shields.io/badge/Licence-GPL_2.0_or_later-555555?style=for-the-badge)](#licence)
 
 [Website](https://nitroos.org) ·
@@ -19,8 +20,7 @@
 [Features](FEATURES.md) ·
 [Screenshots](SCREENSHOTS.md) ·
 [Changelog](CHANGELOG.md) ·
-[Benchmarks](BENCHMARKS.md) ·
-[Source code](https://github.com/nitroos-org/reactos)
+[Benchmarks](BENCHMARKS.md)
 
 </div>
 
@@ -37,6 +37,9 @@ NitroOS builds on ReactOS and adds what you need to use it every day: current 64
 **Latest release: `2026.11-2` (17 November 2026)**, based on ReactOS commit [`8fe3cee0560`](https://github.com/reactos/reactos/commit/8fe3cee05606aecd9442674e40038649f048d10d), with 453 changes since 2026.11-1. Unless a section says otherwise, everything on this page refers to that release.
 
 This repository (`nitroos-org/releases`, formerly "reactos-nitro") publishes the NitroOS releases: the installation ISOs, the source code of each release, the changelog and the benchmarks. Development happens in [nitroos-org/reactos](https://github.com/nitroos-org/reactos).
+
+> [!TIP]
+> **Looking for the source code?** It is in **[github.com/nitroos-org/reactos](https://github.com/nitroos-org/reactos)**: the full tree, every release tag, how to build it and how it is tested.
 
 ---
 
