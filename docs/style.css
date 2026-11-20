@@ -80,3 +80,13 @@ nav a.gh{display:inline-flex;align-items:center;gap:7px;vertical-align:middle;ma
 nav a.gh:hover{background:#ffe27a;color:var(--ink)}nav a.gh .ghicon{display:block;width:18px;height:18px}
 @media(max-width:860px){header.top nav a.gh{background:none;color:var(--mist);font-weight:400;padding:11px 4px;border-radius:0;margin:0}header.top nav a.gh .ghicon{width:22px;height:22px}}
 @media(min-width:861px){header.top nav a+a:not(.gh)::before{content:"\00b7";display:inline-block;width:18px;margin-left:-18px;text-align:center;color:#6b72a8;font-weight:700;pointer-events:none}}
+
+.videos{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(480px,100%),1fr));gap:22px}
+.videos .video{margin:0}.videos .video:only-child{max-width:860px}
+.video a.yt,.video iframe.ytframe{display:block;position:relative;width:100%;aspect-ratio:16/9;border-radius:10px;border:1px solid var(--harbor);background:var(--deep);overflow:hidden}
+.video a.yt img{width:100%;height:100%;object-fit:cover;display:block}
+.video a.yt .play{position:absolute;left:50%;top:50%;width:84px;height:58px;margin:-29px 0 0 -42px;border-radius:14px;background:linear-gradient(135deg,var(--lamp),var(--glow));box-shadow:0 6px 24px rgba(0,0,0,.45);transition:transform .15s}
+.video a.yt .play::after{content:"";position:absolute;left:50%;top:50%;margin:-13px 0 0 -8px;border-style:solid;border-width:13px 0 13px 22px;border-color:transparent transparent transparent var(--ink)}
+.video a.yt:hover .play,.video a.yt:focus .play{transform:scale(1.08)}
+.video figcaption{font-size:15px;color:#aab0d8;margin-top:10px}.video figcaption b{color:#fff;font-size:17px}
+.video .when{margin-left:10px;font-size:13px;color:#9aa0c8;white-space:nowrap}

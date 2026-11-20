@@ -19,6 +19,7 @@
 [Quick start](#quick-start) ·
 [Features](FEATURES.md) ·
 [Screenshots](SCREENSHOTS.md) ·
+[Videos](https://nitroos.org/#videos) ·
 [Changelog](CHANGELOG.md) ·
 [Benchmarks](BENCHMARKS.md)
 
@@ -48,6 +49,7 @@ This repository (`nitroos-org/releases`, formerly "reactos-nitro") publishes the
 - [Why NitroOS](#why-nitroos)
 - [What you get](#what-you-get)
 - [Speed](#speed)
+- [Videos](#videos)
 - [Screenshots](#screenshots)
 - [Download](#download)
 - [Quick start](#quick-start)
@@ -122,6 +124,14 @@ How NitroOS compares with the ReactOS code it is built on: the same test program
 ‡ Measured on a development build from before release 2026.11-1. Releases 2026.11-1 and 2026.11-2 make the 4-thread heap test about 30 times faster and small-file reads about 2 times faster in our own tests; the comparison with ReactOS has not been re-run yet.
 
 How we measured: on 8 November 2026, on one host (AMD EPYC 9254, QEMU/KVM), with 4 virtual CPUs and 4 GB of memory, taking the median of 5 runs, with both systems on FAT. ReactOS: upstream master `4d1f0148bed`. NitroOS: development build `a690f0ba892`. Per-run spread and the full method: [`BENCHMARKS.md`](BENCHMARKS.md).
+
+---
+
+## Videos
+
+NitroOS in motion; all videos are on [nitroos.org](https://nitroos.org/#videos).
+
+<p align="center"><a href="https://www.youtube.com/watch?v=Bit0CyDtuDw"><img width="640" alt="Video: NitroOS 2026.11-2 feature tour" src="docs/img/video/Bit0CyDtuDw.jpg"></a><br><a href="https://www.youtube.com/watch?v=Bit0CyDtuDw"><b>▶ NitroOS 2026.11-2: feature tour</b></a></p>
 
 ---
 
