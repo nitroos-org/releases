@@ -167,7 +167,7 @@ Choose the 64-bit ISO unless you need a 32-bit system; all screenshots on this p
 
 ## Quick start
 
-1. Create a virtual machine. We tested with QEMU/KVM: machine `pc` (i440fx), SeaBIOS, 2 to 4 virtual CPUs, 2 to 4 GB of memory, an IDE disk of 8 GB or more, an `e1000` network card and standard VGA. A SATA disk (QEMU's `q35` machine) or an NVMe disk also works, and both copy large files several times faster than IDE in our tests. VirtIO disks are not supported in this release. Other hypervisors and real hardware are untested.
+1. Create a virtual machine. We tested with QEMU/KVM: machine `pc` (i440fx), SeaBIOS, 2 to 4 virtual CPUs, 2 to 4 GB of memory, an IDE disk of 8 GB or more, an `e1000` network card and standard VGA. A SATA disk (QEMU's `q35` machine) also works and copies large files several times faster than IDE in our tests. An NVMe disk works with 2 GB of memory; with 3 GB or more and `-cpu host` this release cannot reach the NVMe controller. VirtIO disks are not supported in this release. Other hypervisors and real hardware are untested.
 
    ```sh
    qemu-img create -f raw nitroos.img 20G
